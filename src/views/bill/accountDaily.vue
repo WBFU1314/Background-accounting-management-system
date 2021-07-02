@@ -25,12 +25,12 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="员工编号">
+            <el-form-item label="员工编号" clearable v-if="this.display">
               <el-input v-model="searchData.staffNo" clearable placeholder="请输入员工编号" style="width: 150px"/>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="员工姓名" clearable>
+            <el-form-item label="员工姓名" clearable v-if="this.display">
               <el-input v-model="searchData.staffName" clearable placeholder="请输入员工姓名" style="width: 150px"/>
             </el-form-item>
           </el-col>
@@ -62,17 +62,17 @@
             <el-select v-else v-model="scope.row.orderName" placeholder="请选择订单名称"
               @change="orderNameSelected(scope.row)">
               <el-option
-                v-for="item in options"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
+                v-for="(item, index) in options"
+                :key="index"
+                :label="item.orderName"
+                :value="item.orderName">
               </el-option>
             </el-select>
           </template>
         </el-table-column>
         <el-table-column prop="orderPrice" label="订单单价" width="80" align="center">
           <template slot-scope="scope">
-            <span>{{scope.row.orderPrice}}</span>
+            <span>{{scope.row.orderUnitPrice}}</span>
           </template>
         </el-table-column>
         <el-table-column label="完成数量" width="160" align="center">
@@ -91,7 +91,7 @@
         <el-table-column prop="remarks" label="备注" width="" align="center">
           <template slot-scope="scope">
             <span v-if="display === false">{{scope.row.remarks}}</span>
-            <el-input v-else class="el-input2" v-model="scope.row.remarks" clearable placeholder="请输入备注" />
+            <el-input v-else class="el-input3" v-model="scope.row.remarks" clearable placeholder="请输入备注" />
           </template>
         </el-table-column>
       </el-table>
@@ -104,7 +104,7 @@
         :total="page.total">
       </el-pagination>
       <correct v-if="showFlag" :showFlag='showFlag' :selectedData='selectedData' :options='options'
-        @setDialogClose='showFlag = false' />
+        @setDialogClose='showFlag = false'/>
     </div>
   </div>
 </template>
@@ -114,33 +114,18 @@ export default {
   data () {
     return {
       display: true,
-      date: '',
+      date: new Date(),
       selectedData: {},
-      staffNo: '',
-      staffName: '',
       orderName: '',
       searchData: {
-        selectedDate: ''
+        selectedDate: new Date(),
+        staffNo: '',
+        staffName: ''
       },
       tableData: [],
       showFlag: false,
       selectionData: [],
-      options: [{
-        value: '1',
-        label: '衬衫'
-      }, {
-        value: '2',
-        label: 'T恤'
-      }, {
-        value: '3',
-        label: '长裤'
-      }, {
-        value: '4',
-        label: '短裤'
-      }, {
-        value: '5',
-        label: '外套'
-      }],
+      options: [],
       page: {
         currentPage: 1,
         pageSize: 10,
@@ -150,12 +135,18 @@ export default {
   },
   methods: {
     submit () {
-      sessionStorage.setItem('time', this.date)
-      let timeb = sessionStorage.getItem('time')
-      console.log(timeb)
-      for (let i = 0; i < this.selectionData.length; i++) {
-        console.log(this.selectionData[i].staffNo)
+      let i
+      let param = []
+      let selectedDate = this.searchData.selectedDate.toLocaleDateString()
+      for (i = 0; i < this.selectionData.length; i++) {
+        this.selectionData[i].mark = this.searchData.selectedDate.toLocaleDateString() + '/' + this.selectionData[i].staffNo
+        this.selectionData[i].selectedDate = selectedDate
       }
+      param = this.selectionData
+      this.$axios.post('api/dayWageInsert', {
+        param
+      })
+      this.getData()
     },
     download () {
       for (let i = 0; i < this.tableData.length; i++) {
@@ -177,24 +168,20 @@ export default {
       this.selectionData = val
     },
     orderNameSelected (val) {
-      if (val.orderName === '1') {
-        val.orderPrice = 1
-      } else if (val.orderName === '2') {
-        val.orderPrice = 2
-      } else if (val.orderName === '3') {
-        val.orderPrice = 3
-      } else if (val.orderName === '4') {
-        val.orderPrice = 4
-      } else if (val.orderName === '5') {
-        val.orderPrice = 5
-      }
-      if (val.staffCompletedQuantity != null) {
-        val.staffDayWage = val.orderPrice * val.staffCompletedQuantity
+      for (let i = 0; i < this.options.length; i++) {
+        if (val.orderName === this.options[i].orderName) {
+          val.orderUnitPrice = this.options[i].orderUnitPrice
+        }
       }
     },
     CompletedQuantityinputed (val) {
+      let a = val.staffCompletedQuantity
+      let staffCompletedQuantity = parseInt(a)
+      let b = val.orderUnitPrice
+      let orderUnitPrice = parseInt(b)
       if (val.staffCompletedQuantity != null) {
-        val.staffDayWage = val.orderPrice * val.staffCompletedQuantity
+        let staffDayWage = orderUnitPrice * staffCompletedQuantity
+        val.staffDayWage = staffDayWage.toFixed(2)
       }
       //  发送完成数量，行内的订单单价，得出单日工资。
     },
@@ -204,33 +191,34 @@ export default {
       this.staffNo = this.selectionData[0].staffNo
       this.staffName = this.selectionData[0].staffName
     },
-    // 匹配时间
-    getDate () {
-      // 获取当前时间
-      var date = new Date()
-      this.date = date
-      console.log(this.date)
-      this.$set(this.searchData, 'selectedDate', date)
-      console.log(this.searchData.selectedDate)
-    },
+    // 比较时间
     compareDate () {
+      let selectedDate = this.searchData.selectedDate.toString()
       // 获取当前年份
       let year1 = this.date.getFullYear()
-      console.log(year1)
+      year1 = year1.toString()
       // 获取选择年份
-      let year2 = this.searchData.selectedDate.getFullYear()
-      console.log(year2)
+      let year2 = selectedDate.substr(0, 4)
 
       // 获取当前月份
       let month1 = this.date.getMonth()
+      month1 += 1
+      month1 = month1.toString()
       // 获取选择月份
-      let month2 = this.searchData.selectedDate.getMonth()
-
+      let month2 = selectedDate.substr(5, 2)
+      let monthFlag = month2[0]
+      if (monthFlag === '0') {
+        month2 = selectedDate.substr(6, 1)
+      }
       // 获取当前日
       let day1 = this.date.getDate()
+      day1 = day1.toString()
       // 获取选择日
-      let day2 = this.searchData.selectedDate.getDate()
-
+      let day2 = selectedDate.substr(8, 2)
+      let dayFlag = day2[0]
+      if (dayFlag === '0') {
+        day2 = selectedDate.substr(9, 1)
+      }
       // 比较当前日期和选中日期
       if (year1 === year2) {
         if (month1 === month2) {
@@ -246,14 +234,41 @@ export default {
         this.display = false
       }
       console.log(this.display)
+      if (this.display) this.getData()
+      else this.search()
     },
     handleCurrentChange (currentPage) {
       this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
+    },
+    getData () {
+      this.$axios({
+        method: 'get',
+        url: 'api/getBillInfoForInsert'
+      }).catch(error => {
+        console.log('error:' + error)
+      }).then(response => {
+        this.tableData = response.data[0]
+        this.options = response.data[1]
+      })
+    },
+    search () {
+      let arr = this.searchData.selectedDate.split('-')
+      if (arr[1][0] === '0') arr[1] = arr[1].substr(1, 1)
+      if (arr[2][0] === '0') arr[2] = arr[2].substr(1, 1)
+      let selectedDate = arr[0] + '/' + arr[1] + '/' + arr[2]
+      this.$axios.post('api/qeuryDayWage', {
+        selectedDate: selectedDate,
+        staffNo: this.searchData.staffNo,
+        staffName: this.searchData.staffName
+      }).catch(error => {
+        console.log('error:' + error)
+      }).then(response => {
+        this.tableData = response.data
+      })
     }
   },
   mounted () {
-    this.getDate()
-    console.log(this.display)
+    this.getData()
   },
   components: {
     correct
@@ -261,11 +276,12 @@ export default {
 }
 </script>
 <style scoped>
-.el-input{
-  width: 210px;
+.el-col{
+  height: 50px
 }
 .botton-group{
   display: flex;
+  justify-content: space-between;
   margin-bottom: 10px
 }
 .el-table-column{
@@ -274,10 +290,16 @@ export default {
 .el-input2{
   width: 130px;
 }
+.el-input3{
+  width: 100px;
+}
+.el-select >>> .el-input__inner{
+  text-align: center;
+}
 .el-input2 >>> .el-input__inner{
   text-align: center;
 }
-.el-select >>> .el-input__inner{
+.el-input3 >>> .el-input__inner{
   text-align: center;
 }
 </style>

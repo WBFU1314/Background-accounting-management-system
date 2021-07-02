@@ -66,7 +66,6 @@ export default {
   methods: {
     // 根据路径绑定到对应的一级菜单，防止页面刷新重新跳回第一个
     toIndex () {
-      console.log(this.$route)
       return this.$route.path.split('/')[1]
     },
     // 切换菜单栏
@@ -77,7 +76,7 @@ export default {
     handleCommand (command) {
       if (command === 'loginout') {
         localStorage.removeItem('ms_username')
-        this.$router.push('/login')
+        this.$router.push('/')
       }
     }
   }

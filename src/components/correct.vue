@@ -20,10 +20,10 @@
         <div style="text-align: center">
           <el-select v-model="selectedData.orderName" @change="orderNameSelected()">
             <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              v-for="(item, index) in options"
+              :key="index"
+              :label="item.orderName"
+              :value="item.orderName">
             </el-option>
           </el-select>
         </div>
@@ -31,7 +31,7 @@
       <el-form-item label="订单单价">
         <template>
           <div style="text-align: center">
-            <span>{{selectedData.orderPrice}}</span>
+            <span>{{selectedData.orderUnitPrice}}</span>
           </div>
         </template>
       </el-form-item>
@@ -74,34 +74,33 @@ export default{
     },
     // 确定
     submit () {
-      console.log(this.selectedData)
+      let param = this.selectedData
+      let params = [param.orderName, param.orderUnitPrice, param.staffCompletedQuantity, param.staffDayWage, param.remarks, param.mark]
+      this.$axios.post('api/updateDayWage', {params})
+      this.$emit('setDialogClose')
     },
     // 修正订单名称，从而修正订单单价
     orderNameSelected () {
-      if (this.selectedData.orderName === '1') {
-        this.selectedData.orderPrice = 1
-      } else if (this.selectedData.orderName === '2') {
-        this.selectedData.orderPrice = 2
-      } else if (this.selectedData.orderName === '3') {
-        this.selectedData.orderPrice = 3
-      } else if (this.selectedData.orderName === '4') {
-        this.selectedData.orderPrice = 4
-      } else if (this.selectedData.orderName === '5') {
-        this.selectedData.orderPrice = 5
-      }
-      if (this.selectedData.staffCompletedQuantity != null) {
-        this.selectedData.staffDayWage = this.selectedData.orderPrice * this.selectedData.staffCompletedQuantity
+      for (let i = 0; i < this.options.length; i++) {
+        if (this.selectedData.orderName === this.options[i].orderName) {
+          this.selectedData.orderUnitPrice = Number(this.options[i].orderUnitPrice)
+        }
       }
     },
     // 修正完成数量
     CompletedQuantityinputed () {
+      let a = this.selectedData.staffCompletedQuantity
+      let staffCompletedQuantity = parseInt(a)
+      let b = this.selectedData.orderUnitPrice
+      let orderUnitPrice = parseInt(b)
       if (this.selectedData.staffCompletedQuantity != null) {
-        this.selectedData.staffDayWage = this.selectedData.orderPrice * this.selectedData.staffCompletedQuantity
+        let staffDayWage = staffCompletedQuantity * orderUnitPrice
+        this.selectedData.staffDayWage = staffDayWage.toFixed(2)
       }
       //  发送完成数量，行内的订单单价，得出单日工资。
     }
   },
-  activated: {
+  mounted () {
   }
 }
 </script>

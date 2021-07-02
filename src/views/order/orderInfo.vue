@@ -100,7 +100,7 @@ export default {
   },
   methods: {
     routerto () {
-      this.$router.push('/orderAdd')
+      this.$router.push('/order/orderAdd')
     },
     deletes () {
       if (this.selectionData.length === 0) {
@@ -111,8 +111,9 @@ export default {
       } else {
         let params = []
         for (let i = 0; i < this.selectionData.length; i++) {
-          params.push(this.selectionData[i].staffNo)
+          params.push(this.selectionData[i].orderNo)
         }
+        console.log(params)
         this.$axios.post('api/delOrder', {
           params
         })
@@ -121,9 +122,7 @@ export default {
     },
     //   【导出excel】
     download () {
-      for (let i = 0; i < this.tableData.length; i++) {
-        console.log(this.tableData[i].orderNo)
-      }
+      console.log(this.selectionData)
     },
     setCurrent (row) {
       this.$refs.selectionData.setCurrentRow(row)
@@ -149,7 +148,6 @@ export default {
       }).then(response => {
         this.rawData = response.data
         this.page.total = this.rawData.length
-        console.log(this.rawData)
         this.tableData = this.rawData.slice(0, 10)
       })
     },
@@ -171,6 +169,7 @@ export default {
 }
 .botton-group{
   display: flex;
+  justify-content: space-between;
   margin-bottom: 10px;
 }
 .el-table-column{

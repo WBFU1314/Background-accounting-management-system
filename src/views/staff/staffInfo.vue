@@ -123,7 +123,7 @@ export default {
   },
   methods: {
     routerto () {
-      this.$router.push('/staffAdd')
+      this.$router.push('/staff/staffAdd')
     },
     deletes () {
       if (this.selectionData.length === 0) {
@@ -194,6 +194,7 @@ export default {
 }
 .botton-group{
   display: flex;
+  justify-content: space-between;
   margin-bottom: 10px
 }
 .el-table-column{

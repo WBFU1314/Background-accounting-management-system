@@ -36,8 +36,9 @@ export default {
   data () {
     return {
       result: [],
+      maxStaffNo: '',
       staff: {
-        staffNo: '',
+        staffNo: 0,
         staffName: '',
         staffGender: '女',
         staffID: '',
@@ -60,7 +61,18 @@ export default {
       }).then(response => {
         this.result = response.data
       })
+    },
+    getMaxStaffNo () {
+      this.$axios.get('/api/getMaxStaffNo').catch(error => {
+        console.log('error:' + error)
+      }).then(response => {
+        this.maxStaffNo = response.data
+        this.staff.staffNo = Number(this.maxStaffNo) + 1
+      })
     }
+  },
+  mounted () {
+    this.getMaxStaffNo()
   }
 }
 </script>
