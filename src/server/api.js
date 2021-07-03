@@ -96,7 +96,6 @@ router.post('/queryStaff',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        c
         if (str.staffResidence != '') sql = sql + " and staffResidence= '" + str.staffResidence + "'"
         if (str.staffGender != '') sql = sql + " and staffGender= '" + str.staffGender + "'"
         connection.query(sql, function (err,result) {
@@ -169,15 +168,27 @@ router.post('/delOrder',function (req,res) {
         })
     })
 })
-router.get('/getBillInfoForInsert/:selectedDate',function (req,res) {
-    const sql = 'SELECT staff.staffNo, staff.staffName, daywage.staffDayWage, daywage.staffCompletedQuantity, daywage.orderName, daywage.orderUnitPrice, daywage.remarks FROM staff LEFT JOIN daywage ON staff.staffNo=daywage.staffNo; select distinct orderName,orderUnitPrice from orders'
-    connection.query(sql,function (err,result) {
-        if (err) throw err
-        res.end(JSON.stringify(result))
+router.post('/getBillInfoForInsert',function (req,res) {
+    const sql = 'SELECT staff.staffNo, staff.staffName, D.staffDayWage, D.staffCompletedQuantity, D.orderName, D.orderUnitPrice, '
+    + 'D.remarks FROM staff LEFT JOIN (select * from dayWage where selectedDate = ? ) D ON staff.staffNo = D.staffNo; ' 
+    + 'select distinct orderName,orderUnitPrice from orders'
+    var str = ''
+    var params = ''
+    req.on('data', (chunk) => {
+        str += chunk
+    })
+    req.on('end', ()=> {
+        str = JSON.parse(str)
+        params = str.selectedDate
+        connection.query(sql, params, function (err,result) {
+            if (err) throw err
+            console.log(result)
+            res.end(JSON.stringify(result)) 
+        })
     })
 })
 router.post('/dayWageInsert',function (req,res) {
-    // const sql = `insert into dayWage(staffNo, staffName, orderName, orderUnitPrice, staffCompletedQuantity, staffDayWage, mark) values((${params}))`
+    const sql = 'insert into dayWage(staffNo, staffName, staffDayWage, staffCompletedQuantity, orderName, orderUnitPrice, remarks, mark, selectedDate, selectedMonth) values (?,?,?,?,?,?,?,?,?,?)'
     var str = ''
     var params = []
     req.on('data', (chunk) => {
@@ -190,7 +201,7 @@ router.post('/dayWageInsert',function (req,res) {
                 params.push(str.param[i][j])
             }
             console.log(params)
-            connection.query('insert into dayWage(staffNo, staffName, staffDayWage, staffCompletedQuantity, orderName, orderUnitPrice, remarks, mark, selectedDate) values (?,?,?,?,?,?,?,?,?)', params, function (err,result) {
+            connection.query(sql, params, function (err,result) {
                 if (err) throw err
             })
             params = []
@@ -233,5 +244,81 @@ router.post('/updateDayWage',function (req,res) {
             res.end(JSON.stringify(result))
         })
     })
+})
+router.post('/queryDayWageMonthly',function (req,res) { 
+    var sql = 'select distinct orderName,orderUnitPrice from orders; select * from dayWage where 1=1'
+    var str = ''  
+    req.on('data', (chunk) => {
+        str += chunk    
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        if (str.selectedMonth != '') sql = sql + " and selectedMonth= '" + str.selectedMonth + "'"
+        if (str.staffNo != '') sql = sql + " and staffNo= '" + str.staffNo + "'"
+        if (str.staffName != '') sql = sql + " and staffName= '" + str.staffName + "'"
+        connection.query(sql, function (err,result) {
+            if (err) throw err
+            res.end(JSON.stringify(result))
+        })
+    })
+})
+// router.post('/salaryCalculate',function (req,res) { 
+//     var str = ''
+//     var params = []
+//     req.on('data', (chunk) => {
+//         str += chunk    
+//     })
+//     req.on('end', () => {
+//         str = JSON.parse(str)
+//         params = str.params
+//         console.log(params)
+//         for (let i = 0; i < params.length; i++) {
+//             console.log('"' + params[i] + '"')
+//             connection.query('update dayWage set settlement = "1" where mark = ' + '"' + params[i] + '"', function (err,result) {
+//                 if (err) throw err
+//             })  
+//         }
+//     })
+//     res.end(JSON.stringify('ok'))
+// })
+// router.post('/salaryCalculate',function (req,res) { 
+//     var str = ''
+//     var params = []
+//     req.on('data', (chunk) => {
+//         str += chunk    
+//     })
+//     req.on('end', () => {
+//         console.log(str)
+//         str = JSON.parse(str)
+//         console.log(str)
+//         params = str.params
+//         console.log(params)
+//         for(let i = 0; i<params.length; i++){
+//             connection.query(`update dayWage set settlement = "1" where mark = '${params[i]}'`, function (err,result) {
+//                 console.log(result)
+//                 if (err) throw err
+//             })
+//         }
+        
+//     })
+//     res.end(JSON.stringify('ok'))
+// })
+router.post('/salaryCalculate',function (req,res) { 
+    const sql = `update dayWage set settlement = "1" where mark in (${paramsStr})`
+    var str = ''
+    var params = []
+    req.on('data', (chunk) => {
+        str += chunk    
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        params = str.params
+        const paramsStr = "'" + params.join("','") + "'"
+        connection.query(sql, function (err,result) {
+            console.log(result)
+            if (err) throw err
+        })
+    })
+    res.end(JSON.stringify('ok'))
 })
 module.exports = router

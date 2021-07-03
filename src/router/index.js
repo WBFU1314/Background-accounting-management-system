@@ -117,10 +117,10 @@ export default new Router({
           meta: {
             title: '工资结算'
           },
-          redirect: '/salaryCalculate',
+          redirect: '/salary/salaryCalculate',
           children: [
             {
-              path: '/salaryCalculate',
+              path: '/salary/salaryCalculate',
               component: () => import('@/views/salary/salaryCalculate.vue'),
               meta: {
                 title: '工资结算'

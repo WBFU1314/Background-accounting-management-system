@@ -2,13 +2,15 @@
   <div class="content-box">
     <div class="container">
       <div class="botton-group">
-        <el-button type="primary" @click="submit()">保 存</el-button>
-        <el-button type="primary" v-if="this.display === false" @click="correct()" :disabled="this.selectionData.length != 1">更 正</el-button>
+        <el-tooltip class="item" effect="dark" content="请勾选数据进行提交！不可重复提交！可勾选数据进行更改！" placement="top-start">
+          <el-button type="primary" @click="submit()">保 存</el-button>
+        </el-tooltip>
+        <el-button type="primary" @click="correct()" :disabled="this.selectionData.length != 1">更 正</el-button>
         <div style="margin-left: 718px">
           <el-button type="primary" @click="search()">查 询</el-button>
         </div>
       </div>
-      <el-divider />
+      <el-divider/>
       <el-form :model="searchData" label-width="75px">
         <el-row>
           <el-col :span="6">
@@ -25,18 +27,19 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="员工编号" clearable v-if="this.display">
+            <el-form-item label="员工编号" clearable v-if="!this.display">
               <el-input v-model="searchData.staffNo" clearable placeholder="请输入员工编号" style="width: 150px"/>
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-form-item label="员工姓名" clearable v-if="this.display">
+            <el-form-item label="员工姓名" clearable v-if="!this.display">
               <el-input v-model="searchData.staffName" clearable placeholder="请输入员工姓名" style="width: 150px"/>
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <el-table
+        stripe
         ref="selectionData"
         :data="tableData"
         tooltip-effect="dark"
@@ -104,7 +107,7 @@
         :total="page.total">
       </el-pagination>
       <correct v-if="showFlag" :showFlag='showFlag' :selectedData='selectedData' :options='options'
-        @setDialogClose='showFlag = false'/>
+        distinguish='1' @setDialogClose='showFlag = false'/>
     </div>
   </div>
 </template>
@@ -122,6 +125,7 @@ export default {
         staffNo: '',
         staffName: ''
       },
+      rawData: [],
       tableData: [],
       showFlag: false,
       selectionData: [],
@@ -136,16 +140,37 @@ export default {
   methods: {
     submit () {
       let i
+      let selectedDate
+      let selectedMonth
       let param = []
-      let selectedDate = this.searchData.selectedDate.toLocaleDateString()
+      if (typeof (this.searchData.selectedDate) === 'object') {
+        selectedDate = this.searchData.selectedDate.toLocaleDateString()
+        let arr = selectedDate.split('/')
+        selectedMonth = arr[0] + '/' + arr[1]
+      } else {
+        let arr = this.searchData.selectedDate.split('-')
+        if (arr[1][0] === '0') arr[1] = arr[1].substr(1, 1)
+        if (arr[2][0] === '0') arr[2] = arr[2].substr(1, 1)
+        selectedDate = arr[0] + '/' + arr[1] + '/' + arr[2]
+        selectedMonth = arr[0] + '/' + arr[1]
+      }
       for (i = 0; i < this.selectionData.length; i++) {
         this.selectionData[i].mark = this.searchData.selectedDate.toLocaleDateString() + '/' + this.selectionData[i].staffNo
         this.selectionData[i].selectedDate = selectedDate
+        this.selectionData[i].selectedMonth = selectedMonth
       }
       param = this.selectionData
-      this.$axios.post('api/dayWageInsert', {
-        param
-      })
+      console.log(param)
+      if (this.selectionData.length === 0) {
+        this.$message({
+          message: '请选择一条或多条数据！',
+          type: 'warning'
+        })
+      } else {
+        this.$axios.post('api/dayWageInsert', {
+          param
+        })
+      }
       this.getData()
     },
     download () {
@@ -237,17 +262,16 @@ export default {
       if (this.display) this.getData()
       else this.search()
     },
-    handleCurrentChange (currentPage) {
-      this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
-    },
     getData () {
-      this.$axios({
-        method: 'get',
-        url: 'api/getBillInfoForInsert'
+      let selectedDate = new Date().toLocaleDateString()
+      this.$axios.post('api/getBillInfoForInsert', {
+        selectedDate
       }).catch(error => {
         console.log('error:' + error)
       }).then(response => {
-        this.tableData = response.data[0]
+        this.rawData = response.data[0]
+        this.page.total = this.rawData.length
+        this.tableData = this.rawData.slice(0, 10)
         this.options = response.data[1]
       })
     },
@@ -263,8 +287,13 @@ export default {
       }).catch(error => {
         console.log('error:' + error)
       }).then(response => {
-        this.tableData = response.data
+        this.rawData = response.data
+        this.page.total = this.rawData.length
+        this.tableData = this.rawData.slice(0, 10)
       })
+    },
+    handleCurrentChange (currentPage) {
+      this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
     }
   },
   mounted () {
@@ -291,7 +320,7 @@ export default {
   width: 130px;
 }
 .el-input3{
-  width: 100px;
+  width: 120px;
 }
 .el-select >>> .el-input__inner{
   text-align: center;

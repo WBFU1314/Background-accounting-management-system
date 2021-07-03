@@ -123,6 +123,13 @@ a {
   color: #FFF;
 }
 
+.el-button--primary.is-disabled, .el-button--primary.is-disabled:active, .el-button--primary.is-disabled:focus, .el-button--primary.is-disabled:hover {
+  color: #FFF;
+  background-color: #038387;
+  opacity: 0.5;
+  border-color: #a0cfff;
+}
+
 .el-divider--horizontal{
   margin: 15px 0
 }
@@ -167,4 +174,29 @@ a {
 
 .el-select .el-input.is-focus .el-input__inner {
   border-color: #038387;
+}
+
+.el-dialog__header {
+  padding: 20px 20px 10px;
+  background-color: #038387;
+}
+
+.el-date-table td.current:not(.disabled) span {
+  color: #FFF;
+  background-color: #038387;
+}
+
+.el-date-table td.today span {
+  color: #038387;
+  font-weight: 700;
+}
+
+/* .el-date-table td.today span {
+  color: #038387;
+  font-weight: 700;
+} */
+
+.el-month-table td.today .cell {
+  color: #038387;
+  font-weight: 700;
 }

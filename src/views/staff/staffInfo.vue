@@ -42,6 +42,7 @@
         </el-row>
       </el-form>
       <el-table
+        stripe
         ref="selectionData"
         :data="tableData"
         tooltip-effect="dark"

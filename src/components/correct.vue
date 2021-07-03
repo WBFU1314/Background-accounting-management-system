@@ -6,6 +6,11 @@
   width="30%"
   :before-close="handleClose">
     <el-form ref="form" label-width="80px">
+      <el-form-item label="日期" v-if="this.distinguish == 2">
+        <div style="text-align: center">
+          <span>{{selectedData.selectedDate}}</span>
+        </div>
+      </el-form-item>
       <el-form-item label="员工编号">
         <div style="text-align: center">
           <span>{{selectedData.staffNo}}</span>
@@ -62,7 +67,7 @@
 </template>
 <script>
 export default{
-  props: ['showFlag', 'selectedData', 'options'],
+  props: ['showFlag', 'selectedData', 'options', 'distinguish'],
   data () {
     return {
     }
@@ -116,5 +121,13 @@ export default{
 }
 .el-select >>> .el-input__inner{
   text-align: center;
+}
+.el-form-item {
+  margin-bottom: 0px;
+}
+.el-dialog__wrapper >>> .el-dialog__title {
+    line-height: 24px;
+    font-size: 18px;
+    color: #fff !important;
 }
 </style>
