@@ -2,15 +2,11 @@
 const { json } = require('body-parser')
 var express = require('express')
 var router = express.Router()
-// var models = require('./db')
+var bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+var models = require('./db')
 var mysql = require('mysql')
-var connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : 'qwer',
-    database : 'test',
-    multipleStatements: true
-})
+var connection = mysql.createConnection(models.mysql)
 connection.connect()
 router.get('/user',function (req,res) {
     var users = []
@@ -30,7 +26,6 @@ router.get('/user/:id',function (req,res) {
 })
 router.get('/addUser/:name/:age/:email',function (req,res) {
     var sql = 'insert into users(name,age,email) values(?,?,?)'
-    var user = {name: 'Mike',age:12,email:'1124245@qq,com'}
     var params = [req.params.name,req.params.age,req.params.email]
     connection.query(sql,params,function (err,result) {
         if (err) throw err
@@ -49,30 +44,63 @@ router.get('/updateUser/:id',function (req,res) {
         res.end(JSON.stringify(result))
     })
 })
-router.post('/login',function (req,res) {   
+router.post('/register',function (req,res) {
+    const sql = 'insert into administrators(username, accountNo, password) values(?,?,?)'
     var str = ''
-    var pwd = {}
     req.on('data', (chunk) => {
         str += chunk
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        connection.query('select userpsw from login where username =' + str.username, function (err,result) {
+        console.log(str)
+        let password = str.password
+        const saltRounds = 10;
+        const salt = bcrypt.genSaltSync(saltRounds)
+        var hash = bcrypt.hashSync(password, salt)
+        str.password = hash
+        connection.query(sql, [str.username, str.accountNo, str.password], function(err, result) {
             if (err) throw err
-            pwd = result
-            res.end(JSON.stringify(pwd))
+            res.end('pass')
+        })
+    })
+})
+router.post('/login',function (req,res) {
+    var str = ''
+    var sql = 'select * from administrators where accountNo = ?'
+    req.on('data', (chunk) => {
+        str += chunk
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        connection.query(sql, str.accountNo, function (err, result) {
+            if (err) throw err
+            if (result.length === 0) {
+              res.end('non-existent')
+            } else {
+                const pwdMatchFlag = bcrypt.compareSync(password, result[0].password)
+                if (pwdMatchFlag) res.end('correct')
+                else res.end('incorrect')
+            }
         })
     })
 })
 router.get('/getMaxStaffNo',function (req,res) {
     var maxStaffNo = ''
-    connection.query('select max(staffNo) as maxStaffNo from staff',function (err,result) {
+    connection.query('select max(staffNo) as maxStaffNo from staff',function (err, result) {
         if (err) throw err
         maxStaffNo = result[0].maxStaffNo
         res.end(maxStaffNo)
     })
 })
-router.post('/addStaff/',function (req,res) {   
+router.get('/getMaxOrderNo',function (req,res) {
+    var maxOrderNo = ''
+    connection.query('select max(orderNo) as maxOrderNo from orders',function (err,result) {
+        if (err) throw err
+        maxOrderNo = result[0].maxOrderNo
+        res.end(maxOrderNo)
+    })
+})
+router.post('/addStaff',function (req,res) {   
     var sql = 'insert into staff(staffNo, staffName, staffGender, staffID, staffPhone, staffResidence) values(?,?,?,?,?,?)'
     var str = ''
     let params = []
@@ -104,7 +132,7 @@ router.post('/queryStaff',function (req,res) {
         })
     })
 })
-router.post('/delStffNo',function (req,res) {
+router.post('/delStaff',function (req,res) {
     var str = ''
     var params
     req.on('data', (chunk) => {
@@ -128,9 +156,7 @@ router.post('/addOrder',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        console.log(str);
         params = [str.orderNo, str.orderClient, str.orderName, str.orderTotal, str.orderUnitPrice, str.orderStartDate, str.orderEndDate]
-        console.log(params);
         connection.query(sql, params, function (err,result) {
             if (err) throw err
             res.end(JSON.stringify('1'))
@@ -168,6 +194,23 @@ router.post('/delOrder',function (req,res) {
         })
     })
 })
+router.post('/updateOrder',function (req,res) { 
+    const sql = `update orders set orderStatus = "1" where orderNo in (${paramsStr})`
+    var str = ''
+    var params = []
+    req.on('data', (chunk) => {
+        str += chunk    
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        params = str.params
+        const paramsStr = "'" + params.join("','") + "'"
+        connection.query(sql, function (err,result) {
+            if (err) throw err
+        })
+    })
+    res.end(JSON.stringify('ok'))
+})
 router.post('/getBillInfoForInsert',function (req,res) {
     const sql = 'SELECT staff.staffNo, staff.staffName, D.staffDayWage, D.staffCompletedQuantity, D.orderName, D.orderUnitPrice, '
     + 'D.remarks FROM staff LEFT JOIN (select * from dayWage where selectedDate = ? ) D ON staff.staffNo = D.staffNo; ' 
@@ -182,7 +225,6 @@ router.post('/getBillInfoForInsert',function (req,res) {
         params = str.selectedDate
         connection.query(sql, params, function (err,result) {
             if (err) throw err
-            console.log(result)
             res.end(JSON.stringify(result)) 
         })
     })
@@ -200,7 +242,6 @@ router.post('/dayWageInsert',function (req,res) {
             for(let j in str.param[i]) {
                 params.push(str.param[i][j])
             }
-            console.log(params)
             connection.query(sql, params, function (err,result) {
                 if (err) throw err
             })
@@ -235,12 +276,9 @@ router.post('/updateDayWage',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        console.log(str)
         params = str.params
         connection.query(sql, params, function (err,result) {
-            console.log(sql)
             if (err) throw err
-            console.log(result)
             res.end(JSON.stringify(result))
         })
     })
@@ -315,7 +353,6 @@ router.post('/salaryCalculate',function (req,res) {
         params = str.params
         const paramsStr = "'" + params.join("','") + "'"
         connection.query(sql, function (err,result) {
-            console.log(result)
             if (err) throw err
         })
     })

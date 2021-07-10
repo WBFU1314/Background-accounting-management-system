@@ -4,14 +4,20 @@ import User from '@/views/User'
 import login from '@/views/login'
 import header from '@/components/header'
 import test from '@/views/test'
+import register from '@/views/register'
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/test',
       name: 'test',
       component: test
+    },
+    {
+      path: '/register',
+      name: 'register',
+      component: register
     },
     {
       path: '/',
@@ -135,8 +141,31 @@ export default new Router({
           meta: {
             title: '统计'
           }
+        },
+        {
+          //  权限管理
+          path: '/permission',
+          component: () => import('@/views/permission.vue'),
+          meta: {
+            title: '权限管理'
+          }
         }
       ]
     }
   ]
 })
+
+// router.beforeEach((to, from, next) => {
+//   if (to.path === '/') {
+//     next()
+//   } else {
+//     let token = localStorage.getItem('Authorization')
+//     if (token === null || token === '') {
+//       next('/')
+//     } else {
+//       next()
+//     }
+//   }
+// })
+
+export default router

@@ -2,7 +2,7 @@
 <template>
   <div class="content-box" >
     <div class="container">
-      <el-form ref="stuff" :model="staff" label-width="80px">
+      <el-form ref="staff" :model="staff" label-width="80px" :rules="rules">
         <el-form-item prop="staffNo" label="员工编号">
           <el-input v-model="staff.staffNo" placeholder="请输入员工编号"/>
         </el-form-item>
@@ -44,22 +44,37 @@ export default {
         staffID: '',
         staffPhone: '',
         staffResidence: ''
+      },
+      rules: {
+        staffName: [{ required: true, message: '员工姓名不能为空', trigger: 'blur' }],
+        staffID: [{ required: true, message: '证件号不能为空', trigger: 'blur' }],
+        staffPhone: [{ required: true, message: '联系方式不能为空', trigger: 'blur' }],
+        staffResidence: [{ required: true, message: '住址不能为空', trigger: 'blur' }]
       }
     }
   },
   methods: {
     submit () {
-      this.$axios.post('/api/addStaff', {
-        staffNo: this.staff.staffNo,
-        staffName: this.staff.staffName,
-        staffGender: this.staff.staffGender,
-        staffID: this.staff.staffID,
-        staffPhone: this.staff.staffPhone,
-        staffResidence: this.staff.staffResidence
-      }).catch(error => {
-        console.log('error:' + error)
-      }).then(response => {
-        this.result = response.data
+      this.$refs.staff.validate(valid => {
+        if (valid) {
+          this.$axios.post('/api/addStaff', {
+            staffNo: this.staff.staffNo,
+            staffName: this.staff.staffName,
+            staffGender: this.staff.staffGender,
+            staffID: this.staff.staffID,
+            staffPhone: this.staff.staffPhone,
+            staffResidence: this.staff.staffResidence
+          }).catch(error => {
+            console.log('error:' + error)
+          }).then(response => {
+            this.result = response.data
+            this.$router.push('/staff/staffInfo')
+          })
+        } else {
+          this.$message.error('带"*"字段不能为空！')
+          console.log('error submit!!')
+          return false
+        }
       })
     },
     getMaxStaffNo () {

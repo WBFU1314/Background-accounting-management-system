@@ -2,7 +2,7 @@
 <template>
   <div class="content-box" >
     <div class="container">
-      <el-form ref="order" :model="order" label-width="120px">
+      <el-form ref="order" :model="order" label-width="120px" :rules="rules">
         <el-form-item prop="orderNo" label="订单编号">
           <el-input v-model="order.orderNo" placeholder="请输入订单编号"/>
         </el-form-item>
@@ -12,7 +12,7 @@
         <el-form-item prop="orderName" label="订单名称">
           <el-input v-model="order.orderName" placeholder="请输入订单名称"/>
         </el-form-item>
-        <el-form-item pepropop="orderTotal" label="订单总量">
+        <el-form-item prop="orderTotal" label="订单总量">
           <el-input v-model="order.orderTotal" placeholder="请输入订单总量"/>
         </el-form-item>
         <el-form-item prop="orderUnitPrice" label="订单单价">
@@ -46,27 +46,54 @@ export default {
         orderUnitPrice: '8.0',
         orderStartDate: '',
         orderEndDate: ''
+      },
+      rules: {
+        orderClient: [{ required: true, message: '客户名称不能为空', trigger: 'blur' }],
+        orderName: [{ required: true, message: '订单名称不能为空', trigger: 'blur' }],
+        orderTotal: [{ required: true, message: '订单总量不能为空', trigger: 'blur' }],
+        orderUnitPrice: [{ required: true, message: '订单单价不能为空', trigger: 'blur' }],
+        orderStartDate: [{ required: true, message: '订单开始日期不能为空', trigger: 'blur' }],
+        orderEndDate: [{ required: true, message: '订单结束日期不能为空', trigger: 'blur' }]
       }
     }
   },
   methods: {
     submit () {
-      this.$axios.post('/api/addOrder', {
-        orderNo: this.order.orderNo,
-        orderClient: this.order.orderClient,
-        orderName: this.order.orderName,
-        orderTotal: this.order.orderTotal,
-        orderUnitPrice: this.order.orderUnitPrice,
-        orderStartDate: this.order.orderStartDate,
-        orderEndDate: this.order.orderEndDate
-      }).catch(error => {
+      this.$refs.registerInfo.validate(valid => {
+        if (valid) {
+          this.$axios.post('/api/addOrder', {
+            orderNo: this.order.orderNo,
+            orderClient: this.order.orderClient,
+            orderName: this.order.orderName,
+            orderTotal: this.order.orderTotal,
+            orderUnitPrice: this.order.orderUnitPrice,
+            orderStartDate: this.order.orderStartDate,
+            orderEndDate: this.order.orderEndDate
+          }).catch(error => {
+            console.log('error:' + error)
+          }).then(response => {
+            this.result = response.data
+            console.log(this.result)
+            this.$router.push('/order/orderInfo')
+          })
+        } else {
+          this.$message.error('带"*"字段不能为空！')
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
+    getMaxOrderNo () {
+      this.$axios.get('/api/getMaxOrderNo').catch(error => {
         console.log('error:' + error)
       }).then(response => {
-        this.result = response.data
-        console.log(this.result)
-        this.$router.push('/orderInfo')
+        this.maxOrderNo = response.data
+        this.order.orderNo = Number(this.maxOrderNo) + 1
       })
     }
+  },
+  mounted () {
+    this.getMaxOrderNo()
   }
 }
 </script>

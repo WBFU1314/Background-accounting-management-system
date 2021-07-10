@@ -3,9 +3,14 @@
     <div class="container">
       <div class="botton-group">
         <el-button type="primary" @click="routerto()">新添订单</el-button>
-        <el-button type="primary" @click="deletes()">删除订单</el-button>
+        <el-tooltip class="item" effect="dark" content="不可回复操作！请确认后再点击！一次只能结算一条数据！" placement="top-start">
+          <el-button type="primary" @click="settle()" :disabled ="this.selectionData.length != 1">结算订单</el-button>
+        </el-tooltip>
+        <el-tooltip class="item" effect="dark" content="不可回复操作！请确认后再点击！一次只能删除一条订单！" placement="top-start">
+          <el-button type="primary" @click="deletes()" :disabled ="this.selectionData.length != 1">删除订单</el-button>
+        </el-tooltip>
         <el-button type="primary" @click="download()">导出订单信息表</el-button>
-        <div style="margin-left: 500px">
+        <div style="margin-left: 400px">
           <el-button type="primary" @click="getData()">查 询</el-button>
         </div>
       </div>
@@ -35,7 +40,7 @@
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="55px" align="center" />
-        <el-table-column prop="orderNo" label="订单编号" width="100" align="center">
+        <el-table-column prop="orderNo" label="订单编号" width="80" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderNo}}</span>
           </template>
@@ -50,12 +55,12 @@
             <span>{{scope.row.orderName}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="orderTotal" label="订单总量" width="100" align="center">
+        <el-table-column prop="orderTotal" label="订单总量" width="80" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderTotal}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="orderUnitPrice" label="订单单价" width="100" align="center">
+        <el-table-column prop="orderUnitPrice" label="订单单价" width="80" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderUnitPrice}}</span>
           </template>
@@ -68,6 +73,12 @@
         <el-table-column prop="orderEndDate" label="订单交货日期" width="" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderEndDate}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="orderStatus" label="订单状态" width="" align="center">
+          <template slot-scope="scope">
+            <span v-if="scope.row.orderStatus == 0" style="color: green">进行中</span>
+            <span v-else style="color: red">已结束</span>
           </template>
         </el-table-column>
       </el-table>
@@ -103,13 +114,13 @@ export default {
     routerto () {
       this.$router.push('/order/orderAdd')
     },
+    //  删除订单
     deletes () {
-      if (this.selectionData.length === 0) {
-        this.$message({
-          message: '请选择一条或多条数据',
-          type: 'warning'
-        })
-      } else {
+      this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
         let params = []
         for (let i = 0; i < this.selectionData.length; i++) {
           params.push(this.selectionData[i].orderNo)
@@ -118,8 +129,44 @@ export default {
         this.$axios.post('api/delOrder', {
           params
         })
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
         this.getData()
-      }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    //  结算订单
+    settle () {
+      this.$confirm('此操作将结束该订单, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        let params = []
+        for (let i = 0; i < this.selectionData.length; i++) {
+          params.push(this.selectionData[i].orderNo)
+        }
+        console.log(params)
+        this.$axios.post('api/updateOrder', {
+          params
+        })
+        this.$message({
+          type: 'success',
+          message: '结束成功!'
+        })
+        this.getData()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消结束！'
+        })
+      })
     },
     //   【导出excel】
     download () {

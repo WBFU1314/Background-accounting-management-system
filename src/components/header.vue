@@ -59,7 +59,7 @@ export default {
         {index: 'order', title: '订单管理'},
         {index: 'bill', title: '每日记账'},
         {index: 'salary', title: '工资结算'},
-        {index: 'permission', title: '统计'}
+        {index: 'permission', title: '权限管理'}
       ]
     }
   },

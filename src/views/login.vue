@@ -10,13 +10,13 @@
     <div class="ms-login">
       <div class="ms-title">好好生活，天天向上</div>
       <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
-        <el-form-item prop="username">
-            <el-input v-model="param.username" placeholder="输入账号">
+        <el-form-item prop="accountNo">
+            <el-input v-model="param.accountNo" placeholder="输入账号">
                 <el-button slot="prepend" icon="el-icon-user"></el-button>
             </el-input>
         </el-form-item>
-        <el-form-item prop="userpsw" style="margin-top:25px;">
-            <el-input type="userpsw" placeholder="登录密码" v-model="param.userpsw" @keyup.enter.native="submitForm()">
+        <el-form-item prop="password" style="margin-top:25px;">
+            <el-input type="password" placeholder="登录密码" v-model="param.password" @keyup.enter.native="submitForm()">
                 <el-button slot="prepend" icon="el-icon-lock"></el-button>
             </el-input>
         </el-form-item>
@@ -33,14 +33,13 @@
 export default {
   data () {
     return {
-      pwd: '',
       param: {
-        username: '001',
-        userpsw: '12345678'
+        accountNo: '',
+        password: 'fuwenbing151'
       },
       rules: {
-        username: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
-        userpsw: [{ required: true, message: '密码不能为空', trigger: 'blur' }]
+        accountNo: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
+        password: [{ required: true, message: '密码不能为空', trigger: 'blur' }]
       }
     }
   },
@@ -52,17 +51,17 @@ export default {
       this.$refs.login.validate(valid => {
         if (valid) {
           this.$axios.post('/api/login', {
-            username: this.param.username,
-            userpsw: this.param.userpsw
+            accountNo: this.param.accountNo,
+            password: this.param.password
           }).catch(error => {
             console.log('error:' + error)
           }).then(response => {
-            this.pwd = response.data[0].userpsw
-            if (this.pwd === this.param.userpsw) {
-              this.$message.success('登录成功')
+            if (response.data === 'correct') {
               this.$router.push('/home')
+            } else if (response.data === 'non-existent') {
+              this.$message.error('用户不存在！')
             } else {
-              this.$message.warning('账号或密码不正确，请重新输入！')
+              this.$message.error('账号或密码不正确！')
             }
           })
         } else {
@@ -70,6 +69,13 @@ export default {
         }
       })
     }
+  },
+  mounted () {
+    // console.log(this.$route.query)
+  //   if (this.$route.query) {
+  //     this.param.accountNo = this.this.$route.query.accountNo
+  //     this.param.password = this.this.$route.query.password
+  //   }
   }
 }
 </script>
