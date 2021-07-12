@@ -3,6 +3,7 @@ const { json } = require('body-parser')
 var express = require('express')
 var router = express.Router()
 var bcrypt = require('bcrypt')
+var SecretKey = "Somesecretkey";
 const jwt = require('jsonwebtoken')
 var models = require('./db')
 var mysql = require('mysql')
@@ -75,11 +76,18 @@ router.post('/login',function (req,res) {
         connection.query(sql, str.accountNo, function (err, result) {
             if (err) throw err
             if (result.length === 0) {
-              res.end('non-existent')
+                console.log(result)
+                res.json({reslut:'non-existent'})
             } else {
-                const pwdMatchFlag = bcrypt.compareSync(password, result[0].password)
-                if (pwdMatchFlag) res.end('correct')
-                else res.end('incorrect')
+                const pwdMatchFlag = bcrypt.compareSync(str.password, result[0].password)
+                if (pwdMatchFlag) {
+                    var token = jwt.sign(result[0].accountNo, SecretKey)
+                    console.log(token)
+                    res.json({result:token})
+                }
+                else {
+                    res.json({result:"Invaild"})
+                }
             }
         })
     })
@@ -124,6 +132,8 @@ router.post('/queryStaff',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
+        if (str.staffNo != '') sql = sql + " and staffNo= '" + str.staffNo + "'"
+        if (str.staffName != '') sql = sql + " and staffName= '" + str.staffName + "'"
         if (str.staffResidence != '') sql = sql + " and staffResidence= '" + str.staffResidence + "'"
         if (str.staffGender != '') sql = sql + " and staffGender= '" + str.staffGender + "'"
         connection.query(sql, function (err,result) {
@@ -131,6 +141,22 @@ router.post('/queryStaff',function (req,res) {
             res.end(JSON.stringify(result))
         })
     })
+})
+router.post('/updateStaff',function (req,res) { 
+    var str = ''
+    var params = ''
+    req.on('data', (chunk) => {
+        str += chunk    
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        params = str.params
+        const sql = `update staff set staffStatus = "离职" where staffNo = ${params}`
+        connection.query(sql, params,function (err,result) {
+            if (err) throw err
+        })
+    })
+    res.end(JSON.stringify('ok'))
 })
 router.post('/delStaff',function (req,res) {
     var str = ''
@@ -141,7 +167,8 @@ router.post('/delStaff',function (req,res) {
     req.on('end', ()=> {
         str = JSON.parse(str)
         params = str.params
-        connection.query(`delete from staff where staffNo in (${params})`,function (err,result) {
+        const sql = `delete from staff where staffNo in (${params})`
+        connection.query(sql, function (err,result) {
             if (err) throw err
             res.end(JSON.stringify(result)) 
         })
@@ -188,24 +215,24 @@ router.post('/delOrder',function (req,res) {
     req.on('end', ()=> {
         str = JSON.parse(str)
         params = str.params
-        connection.query(`delete from orders where orderNo in (${params})`,function (err,result) {
+        const sql = `delete from orders where orderNo in (${params})`
+        connection.query(sql, function (err,result) {
             if (err) throw err
             res.end(JSON.stringify(result)) 
         })
     })
 })
 router.post('/updateOrder',function (req,res) { 
-    const sql = `update orders set orderStatus = "1" where orderNo in (${paramsStr})`
+    const sql = `update orders set orderStatus = "1" where orderNo = ?`
     var str = ''
-    var params = []
+    var params = ''
     req.on('data', (chunk) => {
         str += chunk    
     })
     req.on('end', () => {
         str = JSON.parse(str)
         params = str.params
-        const paramsStr = "'" + params.join("','") + "'"
-        connection.query(sql, function (err,result) {
+        connection.query(sql, params,function (err,result) {
             if (err) throw err
         })
     })
@@ -268,7 +295,7 @@ router.post('/qeuryDayWage',function (req,res) {
     })
 })
 router.post('/updateDayWage',function (req,res) { 
-    var sql = 'update dayWage set orderName = ?, orderUnitPrice = ?, staffCompletedQuantity = ?, staffDayWage = ?, remarks = ? where mark = ?'
+    const sql = 'update dayWage set orderName = ?, orderUnitPrice = ?, staffCompletedQuantity = ?, staffDayWage = ?, remarks = ? where mark = ?'
     var str = ''
     let params = [] 
     req.on('data', (chunk) => {
@@ -283,7 +310,7 @@ router.post('/updateDayWage',function (req,res) {
         })
     })
 })
-router.post('/queryDayWageMonthly',function (req,res) { 
+router.post('/queryDayWageMonthly',function (req,res) {
     var sql = 'select distinct orderName,orderUnitPrice from orders; select * from dayWage where 1=1'
     var str = ''  
     req.on('data', (chunk) => {
@@ -341,8 +368,7 @@ router.post('/queryDayWageMonthly',function (req,res) {
 //     })
 //     res.end(JSON.stringify('ok'))
 // })
-router.post('/salaryCalculate',function (req,res) { 
-    const sql = `update dayWage set settlement = "1" where mark in (${paramsStr})`
+router.post('/salaryCalculate',function (req,res) {
     var str = ''
     var params = []
     req.on('data', (chunk) => {
@@ -352,6 +378,8 @@ router.post('/salaryCalculate',function (req,res) {
         str = JSON.parse(str)
         params = str.params
         const paramsStr = "'" + params.join("','") + "'"
+        const sql = `update dayWage set settlement = "1" where mark in (${paramsStr})`
+        console.log(paramsStr)
         connection.query(sql, function (err,result) {
             if (err) throw err
         })

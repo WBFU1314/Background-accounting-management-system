@@ -23,7 +23,7 @@
           </el-col>
           <el-col :span="6">
             <el-form-item label="员工姓名" clearable>
-              <el-input v-model="searchData.staffName" clearable placeholder="请输入员工姓名" />
+              <el-input v-model="searchData.staffName" clearable placeholder="请输入员工姓名" @keyup.enter.native="getData()" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -117,6 +117,7 @@ export default {
       for (let i = 0; i < this.selectionData.length; i++) {
         params.push(this.selectionData[i].mark)
       }
+      console.log(params)
       this.$axios.post('api/salaryCalculate', {
         params
       })
@@ -191,7 +192,6 @@ export default {
       let a = this.searchData.selectedMonth.getFullYear()
       let b = this.searchData.selectedMonth.getMonth() + 1
       let selectedMonth = a + '/' + b
-      console.log(selectedMonth)
       this.$axios.post('api/queryDayWageMonthly', {
         selectedMonth: selectedMonth,
         staffNo: this.searchData.staffNo,
@@ -202,12 +202,10 @@ export default {
         this.rawData = response.data[1]
         this.page.total = this.rawData.length
         this.tableData = this.rawData.slice(0, 10)
-        console.log(this.tableData)
       })
     },
     handleCurrentChange (currentPage) {
       this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
-      console.log(this.tableData)
     }
   },
   mounted () {

@@ -1,5 +1,11 @@
 <template>
   <div class="wrap">
+    <!-- <iframe
+      src="https://www.bilibili.com/video/BV1qt411D7Rr?from=search&seid=5177661942361494953"
+      frameborder="0"
+      allowfullscreen="true"
+      style="width: 100%; height: 540px">
+    </iframe> -->
   </div>
 </template>
 <script>
@@ -15,8 +21,6 @@ export default{
 <style scoped>
 .wrap{
   width: 100%;
-  height: 520px;
-  background: url('../assets/image/index.gif') no-repeat top;
-  background-size: cover;
+  height: 540px;
 }
 </style>

@@ -3,9 +3,14 @@
     <div class="container">
       <div class="botton-group">
         <el-button type="primary" @click="routerto()">新增员工</el-button>
-        <el-button type="primary" @click="deletes()">删除员工</el-button>
+        <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能修改一个员工！" placement="top-start">
+          <el-button type="primary" @click="settle()" :disabled ="this.selectionData.length != 1">修改员工状态</el-button>
+        </el-tooltip>
+        <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能删除一个员工！" placement="top-start">
+          <el-button type="primary" @click="deletes()" :disabled ="this.selectionData.length != 1">删除员工</el-button>
+        </el-tooltip>
         <el-button type="primary" @click="download()">导出员工信息表</el-button>
-        <div style="margin-left: 500px">
+        <div style="margin-left: 400px">
           <el-button type="primary" @click="getData()">查 询</el-button>
         </div>
       </div>
@@ -14,22 +19,22 @@
         <el-row>
           <el-col :span="6">
             <el-form-item label="员工编号">
-              <el-input v-model="searchDate.staffNo" clearable placeholder="请输入员工编号" style="width :150px"/>
+              <el-input v-model="searchDate.staffNo" clearable placeholder="请输入员工编号" style="width :150px" @keyup.enter.native="getData()"/>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="员工姓名" clearable>
-              <el-input v-model="searchDate.staffName" clearable placeholder="请输入员工编号" style="width :150px"/>
+              <el-input v-model="searchDate.staffName" clearable placeholder="请输入员工编号" style="width :150px" @keyup.enter.native="getData()"/>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="居住地" clearable>
-              <el-input v-model="searchDate.staffResidence" clearable placeholder="请输入员工编号" style="width :150px"/>
+              <el-input v-model="searchDate.staffResidence" clearable placeholder="请输入员工编号" style="width :150px" @keyup.enter.native="getData()"/>
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="性别" clearable>
-              <el-select v-model="searchDate.staffGender" clearable placeholder="请选择性别" style="width :150px">
+              <el-select v-model="searchDate.staffGender" clearable placeholder="请选择性别" style="width :150px" @change="getData()">
                 <el-option
                   v-for="item in gender"
                   :key="item.value"
@@ -57,7 +62,7 @@
             <span>{{scope.row.staffNo}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="staffName" label="员工姓名" width="155" align="center">
+        <el-table-column prop="staffName" label="员工姓名" width="120" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffName}}</span>
           </template>
@@ -72,14 +77,19 @@
             <span>{{scope.row.staffID}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="staffPhone" label="联系方式" width="155" align="center">
+        <el-table-column prop="staffPhone" label="联系方式" width="120" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffPhone}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="staffResidence" label="居住地" width="" align="center">
+        <el-table-column prop="staffResidence" label="居住地" width="180" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffResidence}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="staffStatus" label="状态" width="" align="center">
+          <template slot-scope="scope">
+            <span :style="scope.row.staffStatus === '在职' ? 'color: green' : 'color: red'">{{scope.row.staffStatus}}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -123,25 +133,35 @@ export default {
     }
   },
   methods: {
+    //  新增员工
     routerto () {
       this.$router.push('/staff/staffAdd')
     },
+    // 删除员工
     deletes () {
-      if (this.selectionData.length === 0) {
-        this.$message({
-          message: '请选择一条或多条数据',
-          type: 'warning'
-        })
-      } else {
-        let params = []
-        for (let i = 0; i < this.selectionData.length; i++) {
-          params.push(this.selectionData[i].staffNo)
-        }
-        this.$axios.post('api/delStaff', {
-          params
-        })
-        this.getData()
+      let params = []
+      for (let i = 0; i < this.selectionData.length; i++) {
+        params.push(this.selectionData[i].staffNo)
       }
+      this.$axios.post('api/delStaff', {
+        params
+      })
+      // .catch(error => {
+      //   console.log('error:' + error)
+      // }).then(response => {
+      // })
+    },
+    //  修改员工状态
+    settle () {
+      let params = []
+      for (let i = 0; i < this.selectionData.length; i++) {
+        params.push(this.selectionData[i].staffNo)
+      }
+      console.log(params)
+      this.$axios.post('api/updateStaff', {
+        params
+      })
+      this.getData()
     },
     download () {
       for (let i = 0; i < this.tableData.length; i++) {

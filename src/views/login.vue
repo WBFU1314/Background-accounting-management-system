@@ -35,7 +35,7 @@ export default {
     return {
       param: {
         accountNo: '',
-        password: 'fuwenbing151'
+        password: ''
       },
       rules: {
         accountNo: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
@@ -56,12 +56,12 @@ export default {
           }).catch(error => {
             console.log('error:' + error)
           }).then(response => {
-            if (response.data === 'correct') {
-              this.$router.push('/home')
-            } else if (response.data === 'non-existent') {
+            if (response.data.result === 'Invaild') {
+              this.$message.error('账号或密码不正确！')
+            } else if (response.data.result === 'non-existent') {
               this.$message.error('用户不存在！')
             } else {
-              this.$message.error('账号或密码不正确！')
+              this.$router.push('/home')
             }
           })
         } else {
