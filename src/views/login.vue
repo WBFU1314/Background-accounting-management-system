@@ -56,11 +56,13 @@ export default {
           }).catch(error => {
             console.log('error:' + error)
           }).then(response => {
-            if (response.data.result === 'Invaild') {
-              this.$message.error('账号或密码不正确！')
-            } else if (response.data.result === 'non-existent') {
+            if (response.data === 'non-existent') {
               this.$message.error('用户不存在！')
+            } else if (response.data.result === 'Invaild') {
+              this.$message.error('账号或密码不正确！')
             } else {
+              console.log(response)
+              window.localStorage.setItem('token', response.data.result)
               this.$router.push('/home')
             }
           })

@@ -3,12 +3,15 @@ const { json } = require('body-parser')
 var express = require('express')
 var router = express.Router()
 var bcrypt = require('bcrypt')
-var SecretKey = "Somesecretkey";
+var SecretKey = "Somesecretkey"
+var xlsx = require('node-xlsx')
+var fs = require('fs')
 const jwt = require('jsonwebtoken')
 var models = require('./db')
 var mysql = require('mysql')
 var connection = mysql.createConnection(models.mysql)
 connection.connect()
+
 router.get('/user',function (req,res) {
     var users = []
     connection.query('select * from users',function (err,result) {
@@ -76,8 +79,7 @@ router.post('/login',function (req,res) {
         connection.query(sql, str.accountNo, function (err, result) {
             if (err) throw err
             if (result.length === 0) {
-                console.log(result)
-                res.json({reslut:'non-existent'})
+                res.end('non-existent')
             } else {
                 const pwdMatchFlag = bcrypt.compareSync(str.password, result[0].password)
                 if (pwdMatchFlag) {
@@ -174,6 +176,39 @@ router.post('/delStaff',function (req,res) {
         })
     })
 })
+//  导出员工表
+router.get('/exportStaff',function (req,res) {
+    const sql = 'select * from staff'
+    connection.query(sql, function (err,result) {
+        if (err) throw err
+        var datas=[]
+        var title = ['员工号', '员工姓名', '性别', '身份证号', '联系方式', '居住地', '状态']//这是第一行 俗称列名
+        datas.push(title)
+        result.forEach((element) => {
+            var arrInner = []
+            arrInner.push(element.staffNo)
+            arrInner.push(element.staffName)
+            arrInner.push(element.staffGender)
+            arrInner.push(element.staffID)
+            arrInner.push(element.staffPhone)
+            arrInner.push(element.staffResidence)
+            arrInner.push(element.staffStatus)
+            datas.push(arrInner)    //  data中添加的要是数组，可以将对象的值分解添加进数组，例如：['1','name','上海']
+        })
+        // var name='员工表'+GetDateStr()+'.xlsx'
+        var name = '员工表' + '.xlsx'
+        writeExcel(name,datas)
+        res.download('../assets/excel/'+name)
+        res.end()
+    })
+})
+function writeExcel(name,datas){
+    var buffer=xlsx.build([{name:'sheet1',data:datas}])
+    fs.writeFileSync('../assets/excel/'+name, buffer,{'flag':'w'})
+}
+function GetDateStr(){
+    return new Date().toLocaleDateString()
+}
 router.post('/addOrder',function (req,res) {   
     var sql = 'insert into orders(orderNo, orderClient, orderName, orderTotal, orderUnitPrice, orderStartDate, orderEndDate) values(?,?,?,?,?,?,?)'
     var str = ''

@@ -164,9 +164,9 @@ export default {
       this.getData()
     },
     download () {
-      for (let i = 0; i < this.tableData.length; i++) {
-        console.log(this.tableData[i].staffNo)
-      }
+      this.$axios.get('/api/exportStaff').catch(error => {
+        console.log('error:' + error)
+      }).then(response => {})
     },
     setCurrent (row) {
       this.$refs.selectionData.setCurrentRow(row)
