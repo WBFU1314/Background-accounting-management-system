@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     submit () {
-      this.$refs.registerInfo.validate(valid => {
+      this.$refs.order.validate(valid => {
         if (valid) {
           this.$axios.post('/api/addOrder', {
             orderNo: this.order.orderNo,

@@ -1,9 +1,9 @@
 
 var mysql = {
   host: 'localhost',
-  port: '3306',
+  port: '5555',
   user: 'root',
-  password: 'qwer',
+  password: '1234qwer',
   database: 'test',
   multipleStatements: true
 }
