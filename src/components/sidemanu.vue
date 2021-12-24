@@ -48,7 +48,7 @@ export default {
   width: 0;
 }
 .sidebar-el-menu {
-  width: 250px;
+  width: 200px;
 }
 .sidebar > ul {
   height: 100%;

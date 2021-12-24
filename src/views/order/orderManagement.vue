@@ -30,6 +30,10 @@ export default {
         {
           index: 'orderAdd',
           title: '新增订单'
+        },
+        {
+          index: 'orderHistory',
+          title: '历史订单'
         }
       ]
     }

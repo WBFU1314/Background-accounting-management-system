@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="UserImg-box">
-      <img src="../assets/logo.png">
+      <img src="../assets/logo.jpg">
     </div>
     <table>
       <thead>

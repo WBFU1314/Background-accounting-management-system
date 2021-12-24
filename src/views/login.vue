@@ -11,18 +11,18 @@
       <div class="ms-title">好好生活，天天向上</div>
       <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
         <el-form-item prop="accountNo">
-            <el-input v-model="param.accountNo" placeholder="输入账号">
-                <el-button slot="prepend" icon="el-icon-user"></el-button>
-            </el-input>
+          <el-input v-model="param.accountNo" placeholder="输入账号">
+            <i slot="prepend" class="el-icon-user"></i>
+          </el-input>
         </el-form-item>
         <el-form-item prop="password" style="margin-top:25px;">
-            <el-input type="password" placeholder="登录密码" v-model="param.password" @keyup.enter.native="submitForm()">
-                <el-button slot="prepend" icon="el-icon-lock"></el-button>
-            </el-input>
+          <el-input type="password" placeholder="登录密码" v-model="param.password" @keyup.enter.native="submitForm()">
+            <i slot="prepend" class="el-icon-lock"></i>
+          </el-input>
         </el-form-item>
         <div class="login-btn">
-            <el-button type="primary" @click="submitForm()">登录</el-button>
-            <span>没有账号，<el-link type="primary" @click="register()">注册一个</el-link></span>
+          <el-button type="primary" @click="submitForm()">登录</el-button>
+          <span>没有账号，<el-link type="primary" @click="register()">注册一个</el-link></span>
         </div>
       </el-form>
     </div>
@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { setToken } from '../utils/auth'
 export default {
   data () {
     return {
@@ -55,14 +56,13 @@ export default {
             password: this.param.password
           }).catch(error => {
             console.log('error:' + error)
-          }).then(response => {
-            if (response.data === 'non-existent') {
+          }).then(res => {
+            if (res.data === 'non-existent') {
               this.$message.error('用户不存在！')
-            } else if (response.data.result === 'Invaild') {
+            } else if (res.data.result === 'Invaild') {
               this.$message.error('账号或密码不正确！')
             } else {
-              console.log(response)
-              window.localStorage.setItem('token', response.data.result)
+              setToken(res.data.result)
               this.$router.push('/home')
             }
           })
@@ -72,44 +72,37 @@ export default {
       })
     }
   },
-  mounted () {
-    // console.log(this.$route.query)
-  //   if (this.$route.query) {
-  //     this.param.accountNo = this.this.$route.query.accountNo
-  //     this.param.password = this.this.$route.query.password
-  //   }
-  }
+  mounted () {}
 }
 </script>
 
 <style scoped>
 .login-wrap {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: url('../assets/image/bgi1.jpg') no-repeat;
-    background-size: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: url('../assets/image/bgi1.jpg') no-repeat;
+  background-size: 100%;
 }
 .ms-title {
-    width: 100%;
-    text-align: center;
-    font-size: 22px;
-    margin: 25px 0px 15px;
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  padding: 25px 0px 15px;
 }
 .ms-login {
-    width: 450px;
-    height: 365px;
-    max-width: 90%;
-    margin:11% 20% 20% 55%;
-    /* margin: 275px auto; */
-    border-radius: 12px;
-    background: white;
-    overflow: hidden;
+  width: 450px;
+  height: 350px;
+  max-width: 90%;
+  margin:11% 20% 20% 55%;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 0 20px 5px rgba(0,0,0,.2);
 }
 .ms-content {
-    padding: 30px 30px;
+  padding: 30px 30px;
 }
 .login-btn {
   text-align: center;
@@ -119,6 +112,6 @@ export default {
     width: 100%;
     height: 36px;
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 30px;
 }
 </style>

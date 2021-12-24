@@ -88,6 +88,13 @@ const router = new Router({
               meta: {
                 title: '新增订单'
               }
+            },
+            {
+              path: '/order/orderHistory',
+              component: () => import('@/views/order/orderHistory.vue'),
+              meta: {
+                title: '历史订单'
+              }
             }
           ]
         },

@@ -22,7 +22,7 @@ a {
 /* 页面主体部分 */
 .content-box {
   position: absolute;
-  left: 250px;      /* 控制左侧二级菜单栏的宽度 */
+  left: 200px;      /* 控制左侧二级菜单栏的宽度 */
   right: 0;
   top: 70px;
   bottom: 0;
@@ -42,6 +42,7 @@ a {
   left: 65px;
 }
 .container {
+  height: calc(100vh - 130px);
   padding: 20px;    /* 控制主体部分与主体边框的距离 */
   background: #fff;
   border: 1px solid #ddd;

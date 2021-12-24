@@ -2,15 +2,11 @@
   <div class="content-box" >
     <div class="container">
       <div class="botton-group">
-        <el-button type="primary" @click="routerto()">新增员工</el-button>
-        <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能修改一个员工！" placement="top-start">
-          <el-button type="primary" @click="settle()" :disabled ="this.selectionData.length != 1">修改员工状态</el-button>
-        </el-tooltip>
-        <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能删除一个员工！" placement="top-start">
-          <el-button type="primary" @click="deletes()" :disabled ="this.selectionData.length != 1">删除员工</el-button>
-        </el-tooltip>
-        <el-button type="primary" @click="download()">导出员工信息表</el-button>
-        <div style="margin-left: 400px">
+        <div>
+          <el-button type="primary" @click="routerto()">新增员工</el-button>
+          <el-button type="primary" @click="download()">导出员工信息表</el-button>
+        </div>
+        <div>
           <el-button type="primary" @click="getData()">查 询</el-button>
         </div>
       </div>
@@ -53,40 +49,16 @@
         tooltip-effect="dark"
         style="width: 100%"
         highlight-current-row
-        height="365"
+        height="420"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="55px" align="center" />
-        <el-table-column prop="staffNo" label="员工编号" width="80" align="center">
-          <template slot-scope="scope">
-            <span>{{scope.row.staffNo}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="staffName" label="员工姓名" width="120" align="center">
-          <template slot-scope="scope">
-            <span>{{scope.row.staffName}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="staffGender" label="性别" width="80" align="center">
-          <template slot-scope="scope">
-            <span>{{scope.row.staffGender}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="staffID" label="身份证号" width="180" align="center">
-          <template slot-scope="scope">
-            <span>{{scope.row.staffID}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="staffPhone" label="联系方式" width="120" align="center">
-          <template slot-scope="scope">
-            <span>{{scope.row.staffPhone}}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="staffResidence" label="居住地" width="180" align="center">
-          <template slot-scope="scope">
-            <span>{{scope.row.staffResidence}}</span>
-          </template>
-        </el-table-column>
+        <el-table-column prop="staffNo" label="员工编号" width="80" align="center" />
+        <el-table-column prop="staffName" label="员工姓名" width="120" align="center" />
+        <el-table-column prop="staffGender" label="性别" width="80" align="center" />
+        <el-table-column prop="staffID" label="身份证号" width="180" align="center" />
+        <el-table-column prop="staffPhone" label="联系方式" width="120" align="center" />
+        <el-table-column prop="staffResidence" label="居住地" width="180" align="center" />
         <el-table-column prop="staffStatus" label="状态" width="" align="center">
           <template slot-scope="scope">
             <span :style="scope.row.staffStatus === '在职' ? 'color: green' : 'color: red'">{{scope.row.staffStatus}}</span>
@@ -146,10 +118,6 @@ export default {
       this.$axios.post('api/delStaff', {
         params
       })
-      // .catch(error => {
-      //   console.log('error:' + error)
-      // }).then(response => {
-      // })
     },
     //  修改员工状态
     settle () {
@@ -157,7 +125,6 @@ export default {
       for (let i = 0; i < this.selectionData.length; i++) {
         params.push(this.selectionData[i].staffNo)
       }
-      console.log(params)
       this.$axios.post('api/updateStaff', {
         params
       })
