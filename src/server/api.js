@@ -99,7 +99,8 @@ router.get('/getMaxStaffNo',function (req,res) {
     connection.query('select max(staffNo) as maxStaffNo from staff',function (err, result) {
         if (err) throw err
         maxStaffNo = result[0].maxStaffNo
-        res.end(maxStaffNo)
+        if(maxStaffNo) res.end(maxStaffNo)
+        else res.end('0')
     })
 })
 router.get('/getMaxOrderNo',function (req,res) {
@@ -111,7 +112,7 @@ router.get('/getMaxOrderNo',function (req,res) {
     })
 })
 router.post('/addStaff',function (req,res) {   
-    var sql = 'insert into staff(staffNo, staffName, staffGender, staffID, staffPhone, staffResidence) values(?,?,?,?,?,?)'
+    var sql = 'insert into staff(staffNo, staffName, staffGender, staffID, staffPhone, staffResidence, createDate) values(?,?,?,?,?,?,?)'
     var str = ''
     let params = []
     req.on('data', (chunk) => {
@@ -119,7 +120,8 @@ router.post('/addStaff',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        params = [str.staffNo, str.staffName, str.staffGender,str.staffID,str.staffPhone,str.staffResidence]
+        console.log(str.createDate);
+        params = [str.staffNo, str.staffName, str.staffGender,str.staffID,str.staffPhone,str.staffResidence,str.createDate]
         connection.query(sql, params, function (err,result) {
             if (err) throw err
             res.end(JSON.stringify(result))
@@ -127,7 +129,7 @@ router.post('/addStaff',function (req,res) {
     })
 })
 router.post('/queryStaff',function (req,res) { 
-    var sql = 'select * from staff where 1=1'  
+    var sql = 'select * from staff where hasDeleted!=1 '  
     var str = ''
     req.on('data', (chunk) => {
         str += chunk
@@ -135,11 +137,12 @@ router.post('/queryStaff',function (req,res) {
     req.on('end', () => {
         str = JSON.parse(str)
         if (str.staffNo != '') sql = sql + " and staffNo= '" + str.staffNo + "'"
-        if (str.staffName != '') sql = sql + " and staffName= '" + str.staffName + "'"
-        if (str.staffResidence != '') sql = sql + " and staffResidence= '" + str.staffResidence + "'"
-        if (str.staffGender != '') sql = sql + " and staffGender= '" + str.staffGender + "'"
+        if (str.staffName && str.staffName != '') sql = sql + " and staffName= '" + str.staffName + "'"
+        if (str.staffResidence && str.staffResidence != '') sql = sql + " and staffResidence= '" + str.staffResidence + "'"
+        if (str.staffGender && str.staffGender != '') sql = sql + " and staffGender= '" + str.staffGender + "'"
         connection.query(sql, function (err,result) {
             if (err) throw err
+            res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
             res.end(JSON.stringify(result))
         })
     })

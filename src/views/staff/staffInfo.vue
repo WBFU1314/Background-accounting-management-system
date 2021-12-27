@@ -59,9 +59,15 @@
         <el-table-column prop="staffID" label="身份证号" width="180" align="center" />
         <el-table-column prop="staffPhone" label="联系方式" width="120" align="center" />
         <el-table-column prop="staffResidence" label="居住地" width="180" align="center" />
-        <el-table-column prop="staffStatus" label="状态" width="" align="center">
+        <el-table-column prop="staffStatus" label="状态" width="80" align="center">
           <template slot-scope="scope">
-            <span :style="scope.row.staffStatus === '在职' ? 'color: green' : 'color: red'">{{scope.row.staffStatus}}</span>
+            <span :style="scope.row.staffStatus === '0' ? 'color: green' : 'color: red'">{{scope.row.staffStatus}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center">
+          <template slot-scope="scope">
+            <el-button @click="detail(scope.row.staffNo)" type="text">详情</el-button>
+            <el-button @click="handleClick(scope.row)" type="text">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -73,11 +79,15 @@
         :page-size="page.pageSize"
         :total="page.total">
       </el-pagination>
+      <staff-detail v-if="staffDetail" :staffDetail="staffDetail" :staffNo="staffNo" @setDialogClose="staffDetail = false"></staff-detail>
     </div>
   </div>
 </template>
+
 <script>
+import staffDetail from './staffDetail.vue'
 export default {
+  components: { staffDetail },
   data () {
     return {
       staff: [],
@@ -100,9 +110,14 @@ export default {
       page: {
         currentPage: 1,
         pageSize: 10,
-        total: 30
-      }
+        total: 0
+      },
+      staffDetail: false,
+      staffNo: null
     }
+  },
+  mounted () {
+    this.getData()
   },
   methods: {
     //  新增员工
@@ -166,10 +181,11 @@ export default {
     },
     handleCurrentChange (currentPage) {
       this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
+    },
+    detail (staffNo) {
+      this.staffDetail = true
+      this.staffNo = staffNo
     }
-  },
-  mounted () {
-    this.getData()
   }
 }
 </script>

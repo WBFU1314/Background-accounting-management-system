@@ -6,9 +6,12 @@ import router from './router'
 import axios from 'axios'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import Vconsole from 'vconsole'
 Vue.prototype.$axios = axios
 Vue.use(ElementUI)
 Vue.config.productionTip = false
+let vConsole = new Vconsole()
+export default vConsole
 
 /* eslint-disable no-new */
 new Vue({

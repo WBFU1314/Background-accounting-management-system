@@ -11,6 +11,10 @@ body,
   background: #f0f0f0;
 }
 
+div{
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'PingFang SC', "Helvetica Neue", Helvetica, "microsoft yahei", arial, STHeiTi, sans-serif;
 }
@@ -42,7 +46,7 @@ a {
   left: 65px;
 }
 .container {
-  height: calc(100vh - 130px);
+  height: calc(100vh - 90px);
   padding: 20px;    /* 控制主体部分与主体边框的距离 */
   background: #fff;
   border: 1px solid #ddd;
@@ -200,4 +204,75 @@ a {
 .el-month-table td.today .cell {
   color: #038387;
   font-weight: 700;
+}
+
+@font-face {
+  font-family:'Italic';
+  src: url("../font/KlavikaMedium-Italic.otf");
+}
+
+.span1{
+  font-family: PingFang;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.span2{
+  font-family: Italic;
+  font-size: 35px;
+  font-weight: 400;
+  line-height: 50px;
+}
+
+.span3{
+  font-family: PingFang;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.span4{
+  font-family: Italic;
+  font-size: 50px;
+  font-weight: 400;
+  line-height: 50px;
+}
+
+.bold{
+  font-weight: 550;
+}
+
+.dark{
+  color: black
+}
+
+.white{
+  color: white
+}
+
+.gray{
+  color: gray
+}
+
+.DeepPink{
+  color: DeepPink
+}
+
+.Orange{
+  color: Orange
+}
+
+.MediumSlateBlue{
+  color: MediumSlateBlue
+}
+
+.RoyalBlue{
+  color: RoyalBlue
+}
+
+.MediumSpringGreen{
+  color: MediumSpringGreen
+}
+
+.Gold{
+  color: Gold
 }

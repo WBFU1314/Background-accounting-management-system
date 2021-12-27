@@ -6,46 +6,56 @@
  * @LastEditTime: 2021/04/03
  -->
 <template>
-  <div>
-    <div class="wrapper">
+  <div class="wrapper">
     <!-- 页面头部部分 -->
-      <div class="header">
+    <div class="header">
+      <div>
         <div class="logo">记账管理系统</div>
         <!-- 水平一级菜单 -->
-        <div style="float:left;">
-          <el-menu :default-active="toIndex()" mode="horizontal" @select="handleSelect">
+        <div style="float: left">
+          <el-menu
+            :default-active="toIndex()"
+            mode="horizontal"
+            @select="handleSelect"
+          >
             <template v-for="item in items">
               <el-menu-item :index="item.index" :key="item.index">
-              <template slot="title">
+                <template slot="title">
                   <span slot="title">{{ item.title }}</span>
-              </template>
+                </template>
               </el-menu-item>
             </template>
           </el-menu>
         </div>
-        <div class="header-right">
-          <div class="header-user-con">
-            <!-- 用户头像 -->
-            <div class="user-avator"><img src='../assets/image/headPortrait.jpg' /></div>
-            <!-- 用户名下拉菜单 -->
-            <el-dropdown class="user-name" trigger="click" @command="handleCommand">
-              <span class="el-dropdown-link">
-                {{ username }}
-                <i class="el-icon-caret-bottom"></i>
-              </span>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item disabled>修改密码</el-dropdown-item>
-                <el-dropdown-item command="loginout">退出登录</el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
+      </div>
+      <div class="header-right">
+        <div class="header-user-con">
+          <!-- 用户头像 -->
+          <div class="user-avator">
+            <img src="../assets/image/headPortrait.jpg" />
           </div>
+          <!-- 用户名下拉菜单 -->
+          <el-dropdown
+            class="user-name"
+            trigger="click"
+            @command="handleCommand"
+          >
+            <span class="el-dropdown-link">
+              {{ username }}
+              <i class="el-icon-caret-bottom"></i>
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item disabled>修改密码</el-dropdown-item>
+              <el-dropdown-item command="loginout">退出登录</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
         </div>
       </div>
-      <!--页面左侧二级菜单栏，和主体内容区域部分 -->
-      <el-main>
-        <router-view></router-view>
-      </el-main>
     </div>
+    <!--页面左侧二级菜单栏，和主体内容区域部分 -->
+    <el-main>
+      <router-view></router-view>
+    </el-main>
   </div>
 </template>
 <script>
@@ -54,12 +64,12 @@ export default {
     return {
       username: 'FuWB',
       items: [
-        {index: 'home', title: '首页'},
-        {index: 'staff', title: '员工管理'},
-        {index: 'order', title: '订单管理'},
-        {index: 'bill', title: '每日记账'},
-        {index: 'salary', title: '工资结算'},
-        {index: 'permission', title: '权限管理'}
+        { index: 'home', title: '首页' },
+        { index: 'staff', title: '员工管理' },
+        { index: 'order', title: '订单管理' },
+        { index: 'bill', title: '每日记账' },
+        { index: 'salary', title: '工资结算' },
+        { index: 'permission', title: '权限管理' }
       ]
     }
   },
@@ -76,7 +86,7 @@ export default {
     handleCommand (command) {
       if (command === 'loginout') {
         localStorage.removeItem('ms_username')
-        this.$router.push('/')
+        this.$router.push({path: '/'})
       }
     }
   }
@@ -84,60 +94,57 @@ export default {
 </script>
 <style scoped>
 .wrapper {
-    width: 100%;
-    height: 100%;
-    background: #f0f0f0;
+  width: 100%;
+  height: 100%;
+  background: #f0f0f0;
 }
 .header {
-    position: relative;
-    box-sizing: border-box;
-    width: 100%;
-    height: 70px;
-    font-size: 22px;
-    background: #ffffff;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 70px;
+  font-size: 22px;
+  background: #ffffff;
 }
 .header .logo {
-    float: left;
-    margin-left: 60px;
-    margin-top: 17.5px;
-    height: 29px;
-    width: 160px;
-    vertical-align: middle;
-}
-.header-right {
-    float: right;
-    padding-right: 50px;
+  float: left;
+  margin-left: 35px;
+  margin-top: 17.5px;
+  height: 29px;
+  width: 160px;
+  vertical-align: middle;
 }
 .header-user-con {
-    display: flex;
-    height: 70px;
-    align-items: center;
+  display: flex;
+  height: 70px;
+  align-items: center;
 }
 .user-avator {
-    margin-left: 20px;
+  margin-left: 20px;
 }
 .user-avator img {
-    display: block;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
 .user-name {
-    margin-left: 10px;
+  margin-left: 10px;
 }
 .el-menu.el-menu--horizontal {
-    border-bottom: none !important;
-    float: left;
-    margin-left: 50px;
+  border-bottom: none !important;
 }
 .el-menu--horizontal > .el-menu-item.is-active {
-    border-bottom: 2px solid #038387;
-    color: #038387;
-    font-weight: 700;
+  border-bottom: 2px solid #038387;
+  color: #038387;
+  font-weight: 700;
 }
 .el-menu--horizontal > .el-menu-item {
-    font-size: 16px;
-    margin: 0 15px;
-    color: black;
+  font-family: PingFang;
+  font-size: 16px;
+  color: black;
+}
+.el-main {
+  padding: 0;
 }
 </style>

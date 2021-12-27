@@ -28,7 +28,9 @@ span {
   -webkit-animation: spinit 0.2s 5;
   -moz-animation: spinit 0.2s 5;
   animation: spinit 0.2s 5;
+  /* animation-iteration-count: infinite; */
 }
+
 @-webkit-keyframes spinit {
   0% {
     top: 0em;

@@ -71,16 +71,11 @@ export default {
   },
   methods: {
     submit () {
+      let createDate = new Date()
+      this.staff.createDate = createDate.toLocaleDateString()
       this.$refs.staff.validate(valid => {
         if (valid) {
-          this.$axios.post('/api/addStaff', {
-            staffNo: this.staff.staffNo,
-            staffName: this.staff.staffName,
-            staffGender: this.staff.staffGender,
-            staffID: this.staff.staffID,
-            staffPhone: this.staff.staffPhone,
-            staffResidence: this.staff.staffResidence
-          }).catch(error => {
+          this.$axios.post('/api/addStaff', this.staff).catch(error => {
             console.log('error:' + error)
           }).then(response => {
             this.result = response.data
@@ -88,7 +83,6 @@ export default {
           })
         } else {
           this.$message.error('输入内容有误，请查验后再次提交！')
-          console.log('error submit!!')
           return false
         }
       })

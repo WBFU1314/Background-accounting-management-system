@@ -36,7 +36,7 @@
         tooltip-effect="dark"
         style="width: 100%"
         highlight-current-row
-        height="365"
+        height="420"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="55px" align="center" />
@@ -106,7 +106,7 @@ export default {
       page: {
         currentPage: 1,
         pageSize: 10,
-        total: 30
+        total: 0
       }
     }
   },
