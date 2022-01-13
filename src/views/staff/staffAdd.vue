@@ -4,7 +4,7 @@
     <div class="container">
       <el-form ref="staff" :model="staff" label-width="80px" :rules="rules">
         <el-form-item prop="staffNo" label="员工编号">
-          <el-input v-model="staff.staffNo" placeholder="请输入员工编号"/>
+          <el-input v-model="staff.staffNo" placeholder="请输入员工编号" disabled/>
         </el-form-item>
         <el-form-item prop="staffName" label="员工姓名">
           <el-input v-model="staff.staffName" placeholder="请输入员工姓名"/>
@@ -32,6 +32,8 @@
   </div>
 </template>
 <script>
+import { getUserName } from '../../utils/auth'
+import { add0 } from '../../utils/index'
 export default {
   data () {
     return {
@@ -39,11 +41,11 @@ export default {
       maxStaffNo: '',
       staff: {
         staffNo: 0,
-        staffName: '',
+        staffName: '菖蒲',
         staffGender: '女',
-        staffID: '',
-        staffPhone: '',
-        staffResidence: ''
+        staffID: '410521199705086518',
+        staffPhone: '13140103864',
+        staffResidence: '居住地'
       },
       rules: {
         staffName: [{ required: true, message: '员工姓名不能为空', trigger: 'blur' }],
@@ -73,6 +75,8 @@ export default {
     submit () {
       let createDate = new Date()
       this.staff.createDate = createDate.toLocaleDateString()
+      this.staff.staffPassword = this.staff.staffID.substr(6, 8)
+      this.staff.creator = getUserName()
       this.$refs.staff.validate(valid => {
         if (valid) {
           this.$axios.post('/api/addStaff', this.staff).catch(error => {
@@ -92,7 +96,7 @@ export default {
         console.log('error:' + error)
       }).then(response => {
         this.maxStaffNo = response.data
-        this.staff.staffNo = Number(this.maxStaffNo) + 1
+        this.staff.staffNo = add0(Number(this.maxStaffNo) + 1)
       })
     }
   },

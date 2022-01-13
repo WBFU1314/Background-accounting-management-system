@@ -3,19 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>vue_nodejs</title>
+    <title>后台记账管理系统</title>
     <link rel ="shortcut icon" type="image/x-icon" href="static/favicon.ico">
   </head>
   <script>
-    // function checkDevice() {
-      //userAgent 属性是一个只读的字符串，声明了浏览器用于 HTTP 请求的用户代理头的值
-      const u = navigator.userAgent
-      console.log(u);
-      //Android终端
-      // this.isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
-      //iOS终端
-      // this.isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
-    // }
+    var deviceName = null
+    const u = navigator.userAgent
+    //PC端
+    if(!!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/)) {
+      deviceName = 'IOS'
+    } else if (u.indexOf('Android') > -1 || u.indexOf('Adr') > -1) {
+      deviceName = 'Android'
+    } else {
+      deviceName = 'PC'
+    }
+    window.localStorage.setItem('deviceName', deviceName)
   </script>
   <body>
     <div id="app"></div>

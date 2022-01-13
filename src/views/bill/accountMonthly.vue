@@ -39,7 +39,7 @@
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="55px" align="center" />
-        <el-table-column prop="staffNo" label="员工编号" width="80" align="center">
+        <el-table-column prop="staffNo" label="员工编号" width="90" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffNo}}</span>
           </template>
@@ -49,7 +49,7 @@
             <span>{{scope.row.staffName}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="date" label="日期" width="80" align="center">
+        <el-table-column prop="date" label="日期" width="90" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.selectedDate}}</span>
           </template>

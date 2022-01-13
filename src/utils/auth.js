@@ -6,5 +6,25 @@ export function setToken (token) {
 }
 
 export function getToken () {
-  window.localStorage.getItem(Token)
+  return window.localStorage.getItem(Token)
+}
+
+const UserId = 'UserId'
+
+export function setUserId (userId) {
+  window.localStorage.setItem(UserId, userId)
+}
+
+export function getUserId () {
+  return window.localStorage.getItem(UserId)
+}
+
+const UserName = 'userName'
+
+export function setUserName (userName) {
+  window.localStorage.setItem(UserName, userName)
+}
+
+export function getUserName () {
+  return window.localStorage.getItem(UserName)
 }

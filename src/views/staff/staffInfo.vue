@@ -52,8 +52,8 @@
         height="420"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column type="index" label="序号" width="55px" align="center" />
-        <el-table-column prop="staffNo" label="员工编号" width="80" align="center" />
+        <el-table-column type="index" label="序号" width="55" align="center" />
+        <el-table-column prop="staffNo" label="员工编号" width="90" align="center" />
         <el-table-column prop="staffName" label="员工姓名" width="120" align="center" />
         <el-table-column prop="staffGender" label="性别" width="80" align="center" />
         <el-table-column prop="staffID" label="身份证号" width="180" align="center" />
@@ -61,13 +61,15 @@
         <el-table-column prop="staffResidence" label="居住地" width="180" align="center" />
         <el-table-column prop="staffStatus" label="状态" width="80" align="center">
           <template slot-scope="scope">
-            <span :style="scope.row.staffStatus === '0' ? 'color: green' : 'color: red'">{{scope.row.staffStatus}}</span>
+            <!-- <span :style="scope.row.staffStatus === '0' ? 'color: green' : 'color: red'">{{scope.row.staffStatus}}</span> -->
+            <span v-if="scope.row.staffStatus == '0'" style="color: green">在职</span>
+            <span v-else style="color: red">离职</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
             <el-button @click="detail(scope.row.staffNo)" type="text">详情</el-button>
-            <el-button @click="handleClick(scope.row)" type="text">编辑</el-button>
+            <el-button @click="edit(scope.row.staffNo)" type="text">编辑</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -79,7 +81,7 @@
         :page-size="page.pageSize"
         :total="page.total">
       </el-pagination>
-      <staff-detail v-if="staffDetail" :staffDetail="staffDetail" :staffNo="staffNo" @setDialogClose="staffDetail = false"></staff-detail>
+      <staff-detail v-if="staffDetail" :staffDetail="staffDetail" :staffNo="staffNo" :type="type" @setDialogClose="staffDetail = false"></staff-detail>
     </div>
   </div>
 </template>
@@ -113,11 +115,12 @@ export default {
         total: 0
       },
       staffDetail: false,
-      staffNo: null
+      staffNo: null,
+      type: null
     }
   },
   mounted () {
-    this.getData()
+    this.fetchData()
   },
   methods: {
     //  新增员工
@@ -125,15 +128,15 @@ export default {
       this.$router.push('/staff/staffAdd')
     },
     // 删除员工
-    deletes () {
-      let params = []
-      for (let i = 0; i < this.selectionData.length; i++) {
-        params.push(this.selectionData[i].staffNo)
-      }
-      this.$axios.post('api/delStaff', {
-        params
-      })
-    },
+    // deletes () {
+    //   let params = []
+    //   for (let i = 0; i < this.selectionData.length; i++) {
+    //     params.push(this.selectionData[i].staffNo)
+    //   }
+    //   this.$axios.post('api/delStaff', {
+    //     params
+    //   })
+    // },
     //  修改员工状态
     settle () {
       let params = []
@@ -165,7 +168,7 @@ export default {
     handleSelectionChange (val) {
       this.selectionData = val
     },
-    getData () {
+    fetchData () {
       this.$axios.post('api/queryStaff', {
         staffNo: this.searchDate.staffNo,
         staffName: this.searchDate.staffName,
@@ -185,6 +188,12 @@ export default {
     detail (staffNo) {
       this.staffDetail = true
       this.staffNo = staffNo
+      this.type = 'staffDetail'
+    },
+    edit (staffNo) {
+      this.staffDetail = true
+      this.staffNo = staffNo
+      this.type = 'editStaffDetail'
     }
   }
 }

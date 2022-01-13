@@ -59,10 +59,11 @@
   </div>
 </template>
 <script>
+import { getUserId, setUserName } from '../utils/auth'
 export default {
   data () {
     return {
-      username: 'FuWB',
+      username: '',
       items: [
         { index: 'home', title: '首页' },
         { index: 'staff', title: '员工管理' },
@@ -72,6 +73,15 @@ export default {
         { index: 'permission', title: '权限管理' }
       ]
     }
+  },
+  mounted () {
+    let params = {
+      accountNo: getUserId()
+    }
+    this.$axios.get('api/userInfo', { params }).then((res) => {
+      this.username = res.data.username
+      setUserName(res.data.username)
+    })
   },
   methods: {
     // 根据路径绑定到对应的一级菜单，防止页面刷新重新跳回第一个
@@ -85,7 +95,7 @@ export default {
     // 用户名下拉菜单选择事件
     handleCommand (command) {
       if (command === 'loginout') {
-        localStorage.removeItem('ms_username')
+        localStorage.clear()
         this.$router.push({path: '/'})
       }
     }

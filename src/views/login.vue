@@ -6,8 +6,8 @@
  * @LastEditTime: 2021/04/03
  -->
 <template>
-  <div class="login-wrap">
-    <div class="ms-login">
+  <div id="login">
+    <div class="loginForm">
       <div class="ms-title">好好生活，天天向上</div>
       <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
         <el-form-item prop="accountNo">
@@ -20,9 +20,12 @@
             <i slot="prepend" class="el-icon-lock"></i>
           </el-input>
         </el-form-item>
-        <div class="login-btn">
+        <div class="login_btn">
           <el-button type="primary" @click="submitForm()">登录</el-button>
-          <span>没有账号，<el-link type="primary" @click="register()">注册一个</el-link></span>
+        </div>
+        <div class="login_foot">
+          <div><span class="spanLink" @click="register()">没有账号，注册一个</span></div>
+          <div><span class="spanLink" @click="forget()">忘记密码</span></div>
         </div>
       </el-form>
     </div>
@@ -30,7 +33,7 @@
 </template>
 
 <script>
-import { setToken } from '../utils/auth'
+import { setToken, setUserId } from '../utils/auth'
 export default {
   data () {
     return {
@@ -63,6 +66,7 @@ export default {
               this.$message.error('账号或密码不正确！')
             } else {
               setToken(res.data.result)
+              setUserId(this.param.accountNo)
               this.$router.push('/home')
             }
           })
@@ -70,48 +74,72 @@ export default {
           this.$message.error('请输入账号和密码')
         }
       })
+    },
+    forget () {
+      //
     }
   },
-  mounted () {}
+  mounted () {
+    let deviceName = window.localStorage.getItem('deviceName')
+    console.log(deviceName)
+    if (deviceName === 'Android' || deviceName === 'IOS') {
+      this.$router.push('/staffLogin')
+    }
+  }
 }
 </script>
 
-<style scoped>
-.login-wrap {
-  position: absolute;
-  left: 0;
-  top: 0;
+<style lang="scss">
+#login{
   width: 100%;
-  height: 100%;
-  background: url('../assets/image/bgi1.jpg') no-repeat;
-  background-size: 100%;
-}
-.ms-title {
-  width: 100%;
-  text-align: center;
-  font-size: 22px;
-  padding: 25px 0px 15px;
-}
-.ms-login {
-  width: 450px;
-  height: 350px;
-  max-width: 90%;
-  margin:11% 20% 20% 55%;
-  border-radius: 12px;
-  background: white;
-  box-shadow: 0 0 20px 5px rgba(0,0,0,.2);
-}
-.ms-content {
-  padding: 30px 30px;
-}
-.login-btn {
-  text-align: center;
-  margin: 10% 0;
-}
-.login-btn button {
+  min-height: 680px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url('../assets/image/login/tree.png');
+  background-size: cover;
+  .loginForm{
+    width: 400px;
+    height: 350px;
+    max-width: 90%;
+    border-radius: 12px;
+    background: rgba(255,255,255,.15);
+    box-shadow: 0 0 10px 5px rgba(0,0,0,.2);
+  }
+  .ms-title{
     width: 100%;
-    height: 36px;
     text-align: center;
-    margin-bottom: 30px;
+    font-size: 22px;
+    color: #FFFFFF;
+    padding: 25px 0px 15px;
+  }
+  .ms-content{
+    padding: 30px 30px;
+    .el-input{
+      width: 100%;
+    }
+  }
+  .login_btn{
+    text-align: center;
+    margin: 10% 0 0 0;
+    button{
+      width: 100%;
+      height: 36px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+  }
+  .login_foot{
+    display: flex;
+    justify-content: space-between;
+  }
 }
+
+@media screen and (max-width: 400px) {
+  #login {
+    background: url('../assets/image/login/flower.png');
+    background-size: cover;
+  }
+}
+
 </style>

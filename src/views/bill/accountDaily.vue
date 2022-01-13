@@ -2,10 +2,12 @@
   <div class="content-box">
     <div class="container">
       <div class="botton-group">
+        <div>
         <el-tooltip class="item" effect="dark" content="请勾选数据进行提交！不可重复提交！可勾选数据进行更改！" placement="top-start">
           <el-button type="primary" @click="submit()">保 存</el-button>
         </el-tooltip>
         <el-button type="primary" @click="correct()" :disabled="this.selectionData.length != 1">更 正</el-button>
+        </div>
         <div style="margin-left: 718px">
           <el-button type="primary" @click="search()">查 询</el-button>
         </div>
@@ -48,8 +50,8 @@
         height="400"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
-        <el-table-column type="index" label="序号" width="55px" align="center" />
-        <el-table-column prop="staffNo" label="员工编号" width="80" align="center">
+        <el-table-column type="index" label="序号" width="55" align="center" />
+        <el-table-column prop="staffNo" label="员工编号" width="90" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffNo}}</span>
           </template>
@@ -167,9 +169,7 @@ export default {
           type: 'warning'
         })
       } else {
-        this.$axios.post('api/dayWageInsert', {
-          param
-        })
+        this.$axios.post('api/dayWageInsert', {param})
       }
       this.getData()
     },

@@ -1,15 +1,17 @@
 <template>
   <div class="content-box" >
     <div class="container">
-      <div class="botton-group">
-        <el-button type="primary" @click="routerto()">新添订单</el-button>
-        <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能结算一条数据！" placement="top-start">
-          <el-button type="primary" @click="settle()" :disabled ="this.selectionData.length != 1">结算订单</el-button>
-        </el-tooltip>
-        <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能删除一条订单！" placement="top-start">
-          <el-button type="primary" @click="deletes()" :disabled ="this.selectionData.length != 1">删除订单</el-button>
-        </el-tooltip>
-        <el-button type="primary" @click="download()">导出订单信息表</el-button>
+      <div class="botton_group">
+        <div>
+          <el-button type="primary" @click="routerto()">新添订单</el-button>
+          <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能结算一条数据！" placement="top-start">
+            <el-button type="primary" @click="settle()" :disabled ="this.selectionData.length != 1">结算订单</el-button>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能删除一条订单！" placement="top-start">
+            <el-button type="primary" @click="deletes()" :disabled ="this.selectionData.length != 1">删除订单</el-button>
+          </el-tooltip>
+          <el-button type="primary" @click="download()">导出订单信息表</el-button>
+        </div>
         <div style="margin-left: 400px">
           <el-button type="primary" @click="getData()">查 询</el-button>
         </div>
@@ -185,7 +187,7 @@ export default {
 .el-input{
   width: 210px;
 }
-.botton-group{
+.botton_group{
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;

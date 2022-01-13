@@ -6,24 +6,24 @@
  * @LastEditTime: 2021/04/03
  -->
 <template>
-  <div class="register-wrap">
+  <div id="register_wrap">
     <div class="register-table">
       <div class="register-titie">账号注册</div>
       <el-form :model="registerInfo" :rules="rules" ref="registerInfo" label-width="80px" class="register-content">
         <el-form-item prop="username" label="用户名">
-          <el-input v-model="registerInfo.username" placeholder="输入用户名"></el-input>
+          <el-input v-model="registerInfo.username" placeholder="请输入用户名"></el-input>
         </el-form-item>
         <el-form-item prop="accountNo" label="账 号">
-          <el-input v-model="registerInfo.accountNo" placeholder="输入账号"></el-input>
+          <el-input v-model="registerInfo.accountNo" placeholder="请输入账号"></el-input>
         </el-form-item>
         <el-form-item prop="password" label="密  码">
-          <el-input type="password" v-model="registerInfo.password" placeholder="输入密码"></el-input>
+          <el-input type="password" v-model="registerInfo.password" placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item prop="confirmPassword" label="确认密码">
-          <el-input type="password" v-model="registerInfo.confirmPassword" placeholder="再次输入密码"></el-input>
+          <el-input type="password" v-model="registerInfo.confirmPassword" placeholder="请再次输入密码"></el-input>
         </el-form-item>
         <el-form-item prop="captcha" label="验证码" style="margin-bottom: 0px">
-          <el-input class="el-input2" v-model="registerInfo.captcha" placeholder="输入验证码" @keyup.enter.native="register()"></el-input >
+          <el-input class="el-input2" v-model="registerInfo.captcha" placeholder="请输入验证码" @keyup.enter.native="register()"></el-input >
           <el-button @click="refreshCode">刷新验证码</el-button>
           <s-identify :identifyCode="identifyCode"></s-identify>
         </el-form-item>
@@ -140,33 +140,33 @@ export default {
   }
 }
 </script>
-<style scoped>
-.register-wrap {
-  position: absolute;
+<style lang="scss">
+#register_wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
-  background: url('../assets/image/bgi1.jpg') no-repeat top;
+  background: url('../assets/image/login/tree.png') no-repeat;
   background-size: cover
 }
 .register-table {
-  position: relative;
   width: 400px;
   height: 520px;
-  max-width: 90%;
-  margin:7% auto;
-  /* margin: 275px auto; */
   border-radius: 12px;
-  background: white;
-  overflow: hidden
+  background: rgba(255,255,255,.15);
+  box-shadow: 0 0 10px 5px rgba(0,0,0,.2);
 }
 .register-titie {
-    width: 100%;
-    text-align: center;
-    font-size: 22px;
-    margin: 0px 0px 0px;
-    height: 60px;
-    background-color: #038387;
-    line-height: 60px
+  width: 100%;
+  text-align: center;
+  font-size: 22px;
+  color: #FFFFFF;
+  border-radius: 12px 12px 0 0;
+  margin: 0px 0px 0px;
+  height: 60px;
+  // background-color: #038387;
+  line-height: 60px
 }
 .register-content{
   padding: 20px
@@ -195,4 +195,12 @@ export default {
   width: 140px;
   height: 40px
 }
+
+@media screen and (max-width: 400px) {
+  #register_wrap {
+    background: url('../assets/image/login/flower.png');
+    background-size: cover;
+  }
+}
+
 </style>

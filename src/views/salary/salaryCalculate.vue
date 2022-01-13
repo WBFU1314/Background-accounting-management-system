@@ -40,7 +40,7 @@
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="60" align="center" />
         <el-table-column type="index" label="序号" width="55" align="center" />
-        <el-table-column prop="staffNo" label="员工编号" width="80" align="center">
+        <el-table-column prop="staffNo" label="员工编号" width="90" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffNo}}</span>
           </template>

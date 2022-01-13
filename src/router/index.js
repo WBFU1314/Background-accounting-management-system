@@ -2,9 +2,14 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import User from '@/views/User'
 import login from '@/views/login'
+import staffLogin from '@/views/staffLogin'
 import header from '@/components/header'
 import test from '@/views/test'
 import register from '@/views/register'
+import staffHome from '@/views/staffPages/staffHome'
+import clockIn from '@/views/staffPages/clockIn'
+import billFillIn from '@/views/staffPages/billFillIn'
+import billMonth from '@/views/staffPages/billMonth'
 Vue.use(Router)
 
 const router = new Router({
@@ -17,17 +22,49 @@ const router = new Router({
     {
       path: '/register',
       name: 'register',
-      component: register
+      component: register,
+      meta: {title: '管理员注册'}
     },
     {
       path: '/',
-      name: 'login',
-      component: login
+      name: '/',
+      component: login,
+      meta: {title: '管理员登录'}
+    },
+    {
+      path: '/staffLogin',
+      name: 'staffLogin',
+      component: staffLogin,
+      meta: {title: '员工登录'}
     },
     {
       path: '/User',
       name: 'User',
       component: User
+    },
+    {
+      path: '/staffHome',
+      name: 'staffHome',
+      component: staffHome,
+      meta: {title: '员工主页'}
+    },
+    {
+      path: '/clockIn',
+      name: 'clockIn',
+      component: clockIn,
+      meta: {title: '员工打卡'}
+    },
+    {
+      path: '/billFillIn',
+      name: 'billFillIn',
+      component: billFillIn,
+      meta: {title: '每日申报'}
+    },
+    {
+      path: '/billMonth',
+      name: 'billMonth',
+      component: billMonth,
+      meta: {title: '月度记录'}
     },
     {
       path: '/header',
@@ -163,16 +200,7 @@ const router = new Router({
 })
 
 // router.beforeEach((to, from, next) => {
-//   if (to.path === '/') {
-//     next()
-//   } else {
-//     let token = localStorage.getItem('Authorization')
-//     if (token === null || token === '') {
-//       next('/')
-//     } else {
-//       next()
-//     }
-//   }
+//   document.title = to.path
 // })
 
 export default router
