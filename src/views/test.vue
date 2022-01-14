@@ -1,6 +1,6 @@
 <template>
   <div>
-    <span class="animate">1 2 3 4 5 6 7 8 9 0</span>
+    {{ date }}
   </div>
 </template>
 <script>
@@ -8,14 +8,14 @@
 export default{
   data () {
     return {
-      //
+      date: new Date().toLocaleDateString().replace(/\//g, '-')
     }
   }
 }
 </script>
 <style scoped>
 div {
-  width: 1em;
+  width: 100%;
   height: 1em;
   overflow: hidden;
   line-height: 1em;
@@ -31,7 +31,7 @@ span {
   /* animation-iteration-count: infinite; */
 }
 
-@-webkit-keyframes spinit {
+/* @-webkit-keyframes spinit {
   0% {
     top: 0em;
   }
@@ -41,7 +41,7 @@ span {
   100% {
     top: -9em;
   }
-}
+} */
 
 /* Setting the required value to top will make the spinner end at that number */
 

@@ -4,10 +4,10 @@
     <div class="container">
       <el-form ref="staff" :model="staff" label-width="80px" :rules="rules">
         <el-form-item prop="staffNo" label="员工编号">
-          <el-input v-model="staff.staffNo" placeholder="请输入员工编号" disabled/>
+          <el-input v-model="staff.staffNo" placeholder="请输入员工编号" readonly />
         </el-form-item>
         <el-form-item prop="staffName" label="员工姓名">
-          <el-input v-model="staff.staffName" placeholder="请输入员工姓名"/>
+          <el-input v-model="staff.staffName" placeholder="请输入员工姓名" />
         </el-form-item>
         <el-form-item prop="staffGender" label="性别">
           <template>
@@ -16,10 +16,10 @@
           </template>
         </el-form-item>
         <el-form-item prop="staffID" label="身份证号">
-          <el-input v-model="staff.staffID" placeholder="请输入身份证号"/>
+          <el-input v-model="staff.staffID" placeholder="请输入身份证号" />
         </el-form-item>
         <el-form-item prop="staffPhone" label="联系方式">
-          <el-input v-model="staff.staffPhone" placeholder="请输入手机号"/>
+          <el-input v-model="staff.staffPhone" placeholder="请输入手机号" />
         </el-form-item>
         <el-form-item prop="staffResidence" label="居住地">
           <el-input v-model="staff.staffResidence" placeholder="请输入居住地" @keyup.enter.native="submit()" />

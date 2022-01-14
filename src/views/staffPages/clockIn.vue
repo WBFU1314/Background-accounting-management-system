@@ -15,7 +15,7 @@
       <div class="recordTitle">
         <span class="recordTitleSpan">本月打卡记录</span>
       </div>
-      <table border="1" class="recordTable">
+      <table border="1" class="recordTable" v-if="list !== []">
         <tr>
           <th>日期</th>
           <th>员工姓名</th>
@@ -56,8 +56,11 @@ export default {
     fetchData () {
       let year = this.date.split('/')[0]
       let month = this.date.split('/')[1]
-      this.$axios.get(`api/queryClockRecord/${year}/${month}`).then((res) => {
-        this.list = res.data
+      let staffNo = localStorage.getItem('staffNo')
+      this.$axios.get(`api/queryClockRecord/${year}/${month}/${staffNo}`).then((res) => {
+        if (res.data === 'flag4') return
+        if (res.data && res.data.length > 0) this.list = res.data
+        console.log(this.list)
       })
     },
     clockIn () {
@@ -74,14 +77,21 @@ export default {
         if (res.data === 'flag1') {
           this.flag = true
           this.$message.success(this.date.split('/')[0] + '年' + this.date.split('/')[1] + '月' + this.date.split('/')[2] + '日' + '上班打卡成功！')
+          setTimeout(() => {
+            this.fetchData()
+          }, 1000)
         } else if (res.data === 'flag2') {
           this.flag = false
           this.$message.success(this.date.split('/')[0] + '年' + this.date.split('/')[1] + '月' + this.date.split('/')[2] + '日' + '下班打卡成功！')
+          setTimeout(() => {
+            this.fetchData()
+          }, 1000)
+        } else if (res.data === 'flag3') {
+          this.$message.success('今日已签到！')
         } else {
           this.$message.error('出错！')
         }
       })
-      this.fetchData()
     }
   }
 }

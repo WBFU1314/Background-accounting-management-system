@@ -151,7 +151,15 @@ export default {
     download () {
       this.$axios.get('/api/exportStaff').catch(error => {
         console.log('error:' + error)
-      }).then(response => {})
+      }).then((res) => {
+        if (res.data === 'ok') {
+          this.$message.success('导出成功！')
+        } else if (res.data === 'ng') {
+          this.$message.error('导出失败！')
+        } else {
+          this.$message.error('出错！')
+        }
+      })
     },
     setCurrent (row) {
       this.$refs.selectionData.setCurrentRow(row)

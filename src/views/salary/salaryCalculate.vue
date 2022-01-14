@@ -11,7 +11,7 @@
           <el-col :span="6" style="margin-left: -40px">
             <el-form-item label="月份">
               <el-date-picker
-                v-model="searchData.date"
+                v-model="searchData.selectedMonth"
                 type="month"
                 placeholder="选择月份" />
             </el-form-item>
@@ -34,6 +34,7 @@
         :data="tableData"
         :summary-method="getSummaries"
         show-summary
+        height="440"
         tooltip-effect="dark"
         style="width: 100%"
         highlight-current-row
@@ -50,7 +51,7 @@
             <span>{{scope.row.staffName}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="date" label="日期" width="80" align="center">
+        <el-table-column prop="date" label="日期" width="100" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.selectedDate}}</span>
           </template>
@@ -65,17 +66,17 @@
             <span>{{scope.row.orderUnitPrice}}</span>
           </template>
         </el-table-column>
-        <el-table-column label="完成数量" width="80" align="center">
+        <el-table-column label="完成数量" width="100" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffCompletedQuantity}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="staffDayWage" label="单日工资" width="80" align="center">
+        <el-table-column prop="staffDayWage" label="单日工资" width="100" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffDayWage}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="calculation" label="结算" width="80" align="center">
+        <el-table-column prop="calculation" label="结算" width="100" align="center">
           <template slot-scope="scope">
             <span v-if="scope.row.settlement == 0" style="color: red">未结算</span>
             <span v-else style="color: green">已结算</span>
@@ -103,12 +104,7 @@ export default {
       },
       rawData: [],
       tableData: [],
-      selectionData: [],
-      page: {
-        currentPage: 1,
-        pageSize: 10,
-        total: 30
-      }
+      selectionData: []
     }
   },
   methods: {
@@ -117,7 +113,6 @@ export default {
       for (let i = 0; i < this.selectionData.length; i++) {
         params.push(this.selectionData[i].mark)
       }
-      console.log(params)
       this.$axios.post('api/salaryCalculate', {
         params
       })
@@ -140,9 +135,6 @@ export default {
       } else {
         return ''
       }
-    },
-    handleSelectionChange (val) {
-      this.selectionData = val
     },
     orderNameSelected (val) {
       if (val.orderName === 1) {
@@ -199,13 +191,12 @@ export default {
       }).catch(error => {
         console.log('error:' + error)
       }).then(response => {
-        this.rawData = response.data[1]
-        this.page.total = this.rawData.length
-        this.tableData = this.rawData.slice(0, 10)
+        this.rawData = response.data
+        this.tableData = this.rawData
       })
     },
-    handleCurrentChange (currentPage) {
-      this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
+    handleSelectionChange (val) {
+      this.selectionData = val
     }
   },
   mounted () {

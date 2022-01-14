@@ -8,7 +8,7 @@
 <template>
   <div id="staff_login">
     <div class="loginForm">
-      <div class="ms-title">好好生活，天天向上</div>
+      <div class="ms_title">员工登录入口</div>
       <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
         <el-form-item prop="accountNo">
           <el-input v-model="param.accountNo" placeholder="输入账号">
@@ -23,10 +23,10 @@
         <div class="login_btn">
           <el-button type="primary" @click="submitForm()">登录</el-button>
         </div>
-        <div class="login_foot">
+        <!-- <div class="login_foot">
           <div><span class="spanLink" @click="register()">没有账号，注册一个</span></div>
           <div><span class="spanLink" @click="forget()">忘记密码</span></div>
-        </div>
+        </div> -->
       </el-form>
     </div>
   </div>
@@ -37,8 +37,8 @@ export default {
   data () {
     return {
       param: {
-        accountNo: '00000001',
-        password: '19970508'
+        accountNo: '00000002',
+        password: ''
       },
       rules: {
         accountNo: [{ required: true, message: '账号不能为空', trigger: 'blur' }],
@@ -92,17 +92,18 @@ export default {
   background-size: cover;
   .loginForm{
     width: 400px;
-    height: 350px;
+    height: 310px;
     max-width: 90%;
     border-radius: 12px;
     background: rgba(255,255,255,.15);
     box-shadow: 0 0 10px 5px rgba(0,0,0,.2);
   }
-  .ms-title{
+  .ms_title{
     width: 100%;
     text-align: center;
     font-size: 22px;
-    color: #FFFFFF;
+    font-weight: 550;
+    color: #038387;
     padding: 25px 0px 15px;
   }
   .ms-content{
@@ -121,10 +122,10 @@ export default {
       margin-bottom: 30px;
     }
   }
-  .login_foot{
-    display: flex;
-    justify-content: space-between;
-  }
+  // .login_foot{
+  //   display: flex;
+  //   justify-content: space-between;
+  // }
 }
 
 @media screen and (max-width: 400px) {

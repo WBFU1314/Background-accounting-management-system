@@ -91,6 +91,9 @@ export default{
           this.selectedData.orderUnitPrice = Number(this.options[i].orderUnitPrice)
         }
       }
+      if (this.selectedData.staffCompletedQuantity !== '') {
+        this.selectedData.staffDayWage = (this.selectedData.orderUnitPrice * Number(this.selectedData.staffCompletedQuantity)).toFixed(2)
+      }
     },
     // 修正完成数量
     CompletedQuantityinputed () {
@@ -106,6 +109,7 @@ export default{
     }
   },
   mounted () {
+    console.log('修改页 ', this.options)
   }
 }
 </script>

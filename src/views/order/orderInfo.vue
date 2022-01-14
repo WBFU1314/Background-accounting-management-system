@@ -42,7 +42,7 @@
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="55px" align="center" />
-        <el-table-column prop="orderNo" label="订单编号" width="80" align="center">
+        <el-table-column prop="orderNo" label="订单编号" width="100" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderNo}}</span>
           </template>
@@ -57,12 +57,12 @@
             <span>{{scope.row.orderName}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="orderTotal" label="订单总量" width="80" align="center">
+        <el-table-column prop="orderTotal" label="订单总量" width="100" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderTotal}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="orderUnitPrice" label="订单单价" width="80" align="center">
+        <el-table-column prop="orderUnitPrice" label="订单单价" width="100" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderUnitPrice}}</span>
           </template>
@@ -72,7 +72,7 @@
             <span>{{scope.row.orderStartDate}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="orderEndDate" label="订单交货日期" width="" align="center">
+        <el-table-column prop="orderEndDate" label="订单交货日期" width="155" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.orderEndDate}}</span>
           </template>
@@ -123,7 +123,6 @@ export default {
       for (let i = 0; i < this.selectionData.length; i++) {
         params.push(this.selectionData[i].orderNo)
       }
-      console.log(params)
       this.$axios.post('api/delOrder', {
         params
       })
@@ -135,9 +134,7 @@ export default {
       for (let i = 0; i < this.selectionData.length; i++) {
         params.push(this.selectionData[i].orderNo)
       }
-      this.$axios.post('api/updateOrder', {
-        params
-      })
+      this.$axios.post('api/updateOrder', {params})
       this.getData()
     },
     //   【导出excel】

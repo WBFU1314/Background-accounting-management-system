@@ -39,11 +39,12 @@ export default {
         {
           title: '月度记录',
           name: 'balance-list',
-          path: 'billMonth'
+          path: '/billMonth'
         },
         {
           title: '修改密码',
-          name: 'setting'
+          name: 'setting',
+          path: '/changePassword'
         }
       ]
     }

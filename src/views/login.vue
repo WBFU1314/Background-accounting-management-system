@@ -8,7 +8,7 @@
 <template>
   <div id="login">
     <div class="loginForm">
-      <div class="ms-title">好好生活，天天向上</div>
+      <div class="ms_title">管理员登录入口</div>
       <el-form :model="param" :rules="rules" ref="login" label-width="0px" class="ms-content">
         <el-form-item prop="accountNo">
           <el-input v-model="param.accountNo" placeholder="输入账号">
@@ -106,11 +106,12 @@ export default {
     background: rgba(255,255,255,.15);
     box-shadow: 0 0 10px 5px rgba(0,0,0,.2);
   }
-  .ms-title{
+  .ms_title{
     width: 100%;
     text-align: center;
     font-size: 22px;
-    color: #FFFFFF;
+    font-weight: 550;
+    color: #038387;
     padding: 25px 0px 15px;
   }
   .ms-content{

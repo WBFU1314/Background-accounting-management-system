@@ -63,7 +63,13 @@ export default {
       else this.form.selectedMonth = this.form.selectedDate.substring(0, 7)
       let param = [this.form]
       this.$axios.post('api/dayWageInsert', {param}).then((res) => {
-        console.log(res)
+        if (res.data === 'ok') {
+          this.$message.success('提交成功！'); this.$router.go(-1)
+        } else if (res.data === 'flag') {
+          this.$message.warning('今日已申报工作量！'); this.$router.go(-1)
+        } else {
+          this.$message.error('出错！')
+        }
       })
     },
     onConfirm0 (value) {

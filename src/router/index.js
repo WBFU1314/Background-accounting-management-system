@@ -10,6 +10,7 @@ import staffHome from '@/views/staffPages/staffHome'
 import clockIn from '@/views/staffPages/clockIn'
 import billFillIn from '@/views/staffPages/billFillIn'
 import billMonth from '@/views/staffPages/billMonth'
+import changePassword from '@/views/staffPages/changePassword'
 Vue.use(Router)
 
 const router = new Router({
@@ -65,6 +66,12 @@ const router = new Router({
       name: 'billMonth',
       component: billMonth,
       meta: {title: '月度记录'}
+    },
+    {
+      path: '/changePassword',
+      name: 'changePassword',
+      component: changePassword,
+      meta: {title: '修改密码'}
     },
     {
       path: '/header',

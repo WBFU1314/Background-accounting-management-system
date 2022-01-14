@@ -9,6 +9,7 @@ var fs = require('fs')
 const jwt = require('jsonwebtoken')
 var models = require('./db')
 var mysql = require('mysql')
+const path  = require('path')
 var connection = mysql.createConnection(models.mysql)
 connection.connect()
 
@@ -56,7 +57,6 @@ router.post('/register',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        console.log(str)
         let password = str.password
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds)
@@ -84,7 +84,6 @@ router.post('/login',function (req,res) {
                 const pwdMatchFlag = bcrypt.compareSync(str.password, result[0].password)
                 if (pwdMatchFlag) {
                     var token = jwt.sign(result[0].accountNo, SecretKey)
-                    console.log(token)
                     res.json({result:token})
                 }
                 else {
@@ -155,7 +154,7 @@ router.post('/addStaff',function (req,res) {
     })
 })
 router.post('/queryStaff',function (req,res) { 
-    var sql = 'select * from staff where hasDeleted!=1 '  
+    var sql = 'select * from staff where staffStatus!=1 '  
     var str = ''
     req.on('data', (chunk) => {
         str += chunk
@@ -208,7 +207,7 @@ router.get('/exportStaff',function (req,res) {
     connection.query(sql, function (err,result) {
         if (err) throw err
         var datas=[]
-        var title = ['员工号', '员工姓名', '性别', '身份证号', '联系方式', '居住地', '状态']//这是第一行 俗称列名
+        var title = ['员工号', '员工姓名', '性别', '身份证号', '联系方式', '居住地', '状态', '入职日期', '离职日期']//这是第一行 俗称列名
         datas.push(title)
         result.forEach((element) => {
             var arrInner = []
@@ -218,25 +217,27 @@ router.get('/exportStaff',function (req,res) {
             arrInner.push(element.staffID)
             arrInner.push(element.staffPhone)
             arrInner.push(element.staffResidence)
-            arrInner.push(element.staffStatus)
+            arrInner.push(element.staffStatus === '0' ? '在职' : '离职')
+            arrInner.push(element.inductionDate)
+            arrInner.push(element.resignDate)
             datas.push(arrInner)    //  data中添加的要是数组，可以将对象的值分解添加进数组，例如：['1','name','上海']
         })
-        // var name='员工表'+GetDateStr()+'.xlsx'
-        var name = '员工表' + '.xlsx'
-        writeExcel(name,datas)
-        res.download('../assets/excel/'+name)
-        res.end()
+        var date = new Date().toLocaleDateString().replace(/\//g,'-')
+        var name = '员工表' + '_' + date + '.xlsx'
+        writeExcel(name, datas)
+        var filePath = path.resolve('../assets/excel/')
+        res.download(filePath + name, (err) => {
+            if(!err) { res.end('ok') }
+            else { res.end('ng') }
+        })
     })
 })
-function writeExcel(name,datas){
-    var buffer=xlsx.build([{name:'sheet1',data:datas}])
-    fs.writeFileSync('../assets/excel/'+name, buffer,{'flag':'w'})
+function writeExcel(name, datas){
+    var buffer = xlsx.build([{ name: 'sheet1', data: datas}])
+    fs.writeFileSync('../assets/excel/' + name, buffer, {'flag':'w'})
 }
-function GetDateStr(){
-    return new Date().toLocaleDateString()
-}
-router.post('/addOrder',function (req,res) {   
-    var sql = 'insert into orders(orderNo, orderClient, orderName, orderTotal, orderUnitPrice, orderStartDate, orderEndDate) values(?,?,?,?,?,?,?)'
+router.post('/addOrder',function (req, res) {   
+    var sql = 'insert into orders(orderNo, orderClient, orderName, orderTotal, orderUnitPrice, orderStartDate, orderEndDate, creator, createDate) values(?,?,?,?,?,?,?,?,?)'
     var str = ''
     let params = []
     req.on('data', (chunk) => {
@@ -244,7 +245,7 @@ router.post('/addOrder',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        params = [str.orderNo, str.orderClient, str.orderName, str.orderTotal, str.orderUnitPrice, str.orderStartDate, str.orderEndDate]
+        params = [str.orderNo, str.orderClient, str.orderName, str.orderTotal, str.orderUnitPrice, str.orderStartDate, str.orderEndDate, str.creator, str.createDate]
         connection.query(sql, params, function (err,result) {
             if (err) throw err
             res.end(JSON.stringify('1'))
@@ -252,7 +253,23 @@ router.post('/addOrder',function (req,res) {
     })
 })
 router.post('/queryOrder',function (req,res) { 
-    var sql = 'select * from orders where 1=1'
+    var sql = 'select * from orders where orderStatus = 0'
+    var str = ''
+    req.on('data', (chunk) => {
+        str += chunk
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        if (str.orderNo != '') sql = sql + " and orderNo= '" + str.orderNo + "'"
+        if (str.orderName != '') sql = sql + " and orderName= '" + str.orderName + "'"
+        connection.query(sql, function (err,result) {
+            if (err) throw err
+            res.end(JSON.stringify(result))
+        })
+    })
+})
+router.post('/queryHistoryOrder',function (req,res) { 
+    var sql = 'select * from orders where orderStatus = 1'
     var str = ''
     req.on('data', (chunk) => {
         str += chunk
@@ -326,7 +343,8 @@ router.post('/getBillInfoForInsert',function (req,res) {
     })
 })
 router.post('/dayWageInsert',function (req,res) {
-    const sql = 'insert into dayWage(staffNo, staffName, orderName, orderUnitPrice, staffCompletedQuantity, staffDayWage, remarks, mark, selectedDate, selectedMonth) values (?,?,?,?,?,?,?,?,?,?)'
+    const sql1 = 'select * from dayWage where mark = ?'
+    const sql2 = 'insert into dayWage(staffNo, staffName, orderName, orderUnitPrice, staffCompletedQuantity, staffDayWage, remarks, mark, selectedDate, selectedMonth) values (?,?,?,?,?,?,?,?,?,?)'
     var str = ''
     var params = []
     req.on('data', (chunk) => {
@@ -334,17 +352,23 @@ router.post('/dayWageInsert',function (req,res) {
     })
     req.on('end', ()=> {
         str = JSON.parse(str)
-        for(let i = 0; i < str.param.length; i++) {
-            for(let j in str.param[i]) {
-                params.push(str.param[i][j])
+        connection.query(sql1, str.param[0].mark, (err, result) => {
+            if (err) throw err
+            if (result !== []) res.end(JSON.stringify('flag'))
+            else {
+                for(let i = 0; i < str.param.length; i++) {
+                    for(let j in str.param[i]) {
+                        params.push(str.param[i][j])
+                    }
+                    connection.query(sql2, params, function (err,result) {
+                        if (err) throw err
+                    })
+                    params = []
+                }
+                res.end(JSON.stringify('ok'))
             }
-            connection.query(sql, params, function (err,result) {
-                if (err) throw err
-            })
-            params = []
-        }
+        })
     })
-    res.end(JSON.stringify('ok'))
 })
 router.post('/qeuryDayWage',function (req,res) { 
     var sql = 'select * from dayWage where 1=1'
@@ -387,11 +411,9 @@ router.post('/queryDayWageMonthly',function (req,res) {
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        console.log(str);
         if (str.selectedMonth && str.selectedMonth != '') sql = sql + " and selectedMonth= '" + str.selectedMonth + "'"
         if (str.staffNo && str.staffNo != '') sql = sql + " and staffNo= '" + str.staffNo + "'"
         if (str.staffName && str.staffName != '') sql = sql + " and staffName= '" + str.staffName + "'"
-        console.log(sql);
         connection.query(sql, function (err,result) {
             if (err) throw err
             res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
@@ -451,7 +473,6 @@ router.post('/salaryCalculate',function (req,res) {
         params = str.params
         const paramsStr = "'" + params.join("','") + "'"
         const sql = `update dayWage set settlement = "1" where mark in (${paramsStr})`
-        console.log(paramsStr)
         connection.query(sql, function (err,result) {
             if (err) throw err
         })
@@ -462,7 +483,8 @@ router.post('/clockIn', (req, res) => {
     var str = ''
     const sql1 = 'select * from attendance where mark = ?'
     const sql2 = 'insert into attendance(staffNo, staffName, creactedDate, clockInTime, mark) values(?,?,?,?,?)'
-    const sql3 = 'update attendance set clockOutTime = ? where mark = ? '
+    const sql3 = 'select * from attendance where mark = ?'
+    const sql4 = 'update attendance set clockOutTime = ? where mark = ? '
     req.on('data', (chunk) => {
         str += chunk
     })
@@ -479,23 +501,60 @@ router.post('/clockIn', (req, res) => {
                 })
             } else {
                 var param = [str.clockOutTime, str.mark]
-                connection.query(sql3, param, (err, result) => {
+                connection.query(sql3, str.mark, (err, result) => {
                     if (err) throw err
-                    if (result.changedRows === 1) res.end(JSON.stringify('flag2'))
-                    else res.end(JSON.stringify('ng2'))
+                    if (result[0].clockInTime && result[0].clockInTime !== '' && result[0].clockOutTime && result[0].clockOutTime !== '') {
+                        res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+                        res.end(JSON.stringify('flag3'))
+                    }
+                    else {
+                        connection.query(sql4, param, (err, result) => {
+                            if (err) throw err
+                            if (result.changedRows === 1) res.end(JSON.stringify('flag2'))
+                            else res.end(JSON.stringify('ng2'))
+                        })
+                    }
                 })
             }
         })
     })
 })
-router.get('/queryClockRecord/:year/:month', (req, res) => {
-    const sql = `select * from attendance where year(creactedDate) = '${req.params.year}' and month(creactedDate) = '${req.params.month}' order by creactedDate`
+router.get('/queryClockRecord/:year/:month/:staffNo', (req, res) => {
+    const sql = `select * from attendance where year(creactedDate) = '${req.params.year}' and month(creactedDate) = '${req.params.month}' and staffNo = '${req.params.staffNo}' order by creactedDate`
     connection.query(sql, (err, result) => {
         if (err) throw err
         if (result.length === 0) {
-           res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'}); res.end(JSON.stringify('暂无本月数据！')) 
+            res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'}); res.end(JSON.stringify('flag4')) 
         }
-        else res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'}); res.end(JSON.stringify(result))
+        else {
+            res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'}); res.end(JSON.stringify(result))
+        }
+    })
+})
+router.post('/changePassword', (req, res) => {
+    var str = ''
+    const sql1 = 'select * from staff where staffNo = ?'
+    const sql2 = 'update staff set staffPassword = ? where staffNo = ?'
+    req.on('data', chunk => {
+        str += chunk
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        connection.query(sql1, str.staffNo, (err, result) => {
+            if (err) throw err
+            if (result && result.length > 0) {
+                if (result[0].staffPassword === str.password1) {
+                    var param = [str.password3, str.staffNo]
+                    connection.query(sql2, param, (err, result) => {
+                        if (err) throw err
+                        if (result.changedRows === 1) res.end(JSON.stringify('ok'))
+                        else res.end(JSON.stringify('ng2'))
+                    })
+                } else {
+                    res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'}); res.end(JSON.stringify('ng1'))
+                }
+            }
+        })
     })
 })
 

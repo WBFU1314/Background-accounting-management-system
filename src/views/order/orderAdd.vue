@@ -4,7 +4,7 @@
     <div class="container">
       <el-form ref="order" :model="order" label-width="120px" :rules="rules">
         <el-form-item prop="orderNo" label="订单编号">
-          <el-input v-model="order.orderNo" placeholder="请输入订单编号"/>
+          <el-input v-model="order.orderNo" placeholder="请输入订单编号" readonly />
         </el-form-item>
         <el-form-item prop="orderClient" label="订单上游">
           <el-input v-model="order.orderClient" placeholder="请输入订单上游"/>
@@ -34,6 +34,8 @@
   </div>
 </template>
 <script>
+import { getUserName } from '../../utils/auth'
+import { add0 } from '../../utils/index'
 export default {
   data () {
     return {
@@ -45,7 +47,9 @@ export default {
         orderTotal: '10000',
         orderUnitPrice: '8.0',
         orderStartDate: '',
-        orderEndDate: ''
+        orderEndDate: '',
+        creator: getUserName(),
+        createDate: new Date().toLocaleDateString()
       },
       rules: {
         orderClient: [{ required: true, message: '客户名称不能为空', trigger: 'blur' }],
@@ -61,15 +65,7 @@ export default {
     submit () {
       this.$refs.order.validate(valid => {
         if (valid) {
-          this.$axios.post('/api/addOrder', {
-            orderNo: this.order.orderNo,
-            orderClient: this.order.orderClient,
-            orderName: this.order.orderName,
-            orderTotal: this.order.orderTotal,
-            orderUnitPrice: this.order.orderUnitPrice,
-            orderStartDate: this.order.orderStartDate,
-            orderEndDate: this.order.orderEndDate
-          }).catch(error => {
+          this.$axios.post('api/addOrder', this.order).catch(error => {
             console.log('error:' + error)
           }).then(response => {
             this.result = response.data
@@ -88,7 +84,7 @@ export default {
         console.log('error:' + error)
       }).then(response => {
         this.maxOrderNo = response.data
-        this.order.orderNo = Number(this.maxOrderNo) + 1
+        this.order.orderNo = add0(Number(this.maxOrderNo) + 1)
       })
     }
   },

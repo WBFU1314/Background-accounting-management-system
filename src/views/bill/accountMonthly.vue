@@ -96,6 +96,7 @@
 <script>
 import correct from '@/components/correct.vue'
 export default {
+  components: { correct },
   data () {
     return {
       showFlag: false,
@@ -114,6 +115,10 @@ export default {
         total: 30
       }
     }
+  },
+  mounted () {
+    this.getData()
+    this.getDict()
   },
   methods: {
     // 勾选表格颜色修改
@@ -135,33 +140,30 @@ export default {
       this.staffName = this.selectionData[0].staffName
     },
     getData () {
-      console.log(this.searchData)
       let a = this.searchData.selectedMonth.getFullYear()
       let b = this.searchData.selectedMonth.getMonth() + 1
       let selectedMonth = a + '/' + b
-      console.log(selectedMonth)
       this.$axios.post('api/queryDayWageMonthly', {
         selectedMonth: selectedMonth,
         staffNo: this.searchData.staffNo,
         staffName: this.searchData.staffName
       }).catch(error => {
         console.log('error:' + error)
-      }).then(response => {
-        this.options = response.data[0]
-        this.rawData = response.data[1]
+      }).then(res => {
+        this.rawData = res.data
         this.page.total = this.rawData.length
         this.tableData = this.rawData.slice(0, 10)
+      })
+    },
+    getDict () {
+      this.$axios.get('api/getOrderOption').then((res) => {
+        this.options = res.data
+        console.log('信息页', this.options)
       })
     },
     handleCurrentChange (currentPage) {
       this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
     }
-  },
-  mounted () {
-    this.getData()
-  },
-  components: {
-    correct
   }
 }
 </script>
