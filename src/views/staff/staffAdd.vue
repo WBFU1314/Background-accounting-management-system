@@ -41,7 +41,7 @@ export default {
       maxStaffNo: '',
       staff: {
         staffNo: 0,
-        staffName: '菖蒲',
+        staffName: '',
         staffGender: '女',
         staffID: '410521199705086518',
         staffPhone: '13140103864',
