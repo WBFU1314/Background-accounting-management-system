@@ -5,7 +5,6 @@
     <el-menu
       class="sidebar-el-menu"
       :default-active="toIndex()"
-      background-color="white"
       text-color="#7a8297"
       active-text-color="#2d8cf0"
       router>
@@ -49,6 +48,7 @@ export default {
 }
 .sidebar-el-menu {
   width: 200px;
+  background-color: var(--bgColor);
 }
 .sidebar > ul {
   height: 100%;
@@ -57,12 +57,12 @@ export default {
 .el-menu-item{
   font-size: 14px !important;
   padding-left: 35px !important;
-  color: black !important;
+  color: var(--fontColor) !important;
 }
 /* 左侧二级菜单选中时的样式 */
 .el-menu-item.is-active {
-  color: white !important;
-  background: #038387!important;
+  color: var(--selectColor) !important;
+  background: var(--theme) !important;
 }
 .el-menu-item, .el-submenu__title {
   height: 50px !important;

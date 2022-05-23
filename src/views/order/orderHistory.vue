@@ -3,7 +3,7 @@
     <div class="container">
       <div class="botton-group">
         <div>
-          <el-button type="primary" @click="download()">导出订单信息表</el-button>
+          <el-button type="primary" @click="download()">导出历史订单信息</el-button>
         </div>
         <div style="margin-left: 400px">
           <el-button type="primary" @click="getData()">查 询</el-button>
@@ -25,6 +25,7 @@
         </el-row>
       </el-form>
       <el-table
+        v-loading="loading"
         stripe
         ref="selectionData"
         :data="tableData"
@@ -92,6 +93,7 @@
 export default {
   data () {
     return {
+      loading: false,
       searchDate: {
         orderNo: '',
         orderName: ''
@@ -111,6 +113,7 @@ export default {
   methods: {
     // 获取历史订单信息
     getData () {
+      this.loading = true
       this.$axios.post('api/queryHistoryOrder', {
         orderNo: this.searchDate.orderNo,
         orderName: this.searchDate.orderName
@@ -120,6 +123,7 @@ export default {
         this.rawData = response.data
         this.page.total = this.rawData.length
         this.tableData = this.rawData.slice(0, 10)
+        this.loading = false
       })
     },
     //   【导出excel】

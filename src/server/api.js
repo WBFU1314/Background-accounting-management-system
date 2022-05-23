@@ -10,9 +10,11 @@ const jwt = require('jsonwebtoken')
 var models = require('./db')
 var mysql = require('mysql')
 const path  = require('path')
+const { ContextExclusionPlugin } = require('webpack')
 var connection = mysql.createConnection(models.mysql)
 connection.connect()
 
+// 测试get,无参数
 router.get('/user',function (req,res) {
     var users = []
     connection.query('select * from users',function (err,result) {
@@ -21,6 +23,7 @@ router.get('/user',function (req,res) {
         res.end(JSON.stringify(users))
     })
 })
+// 测试get,有参数
 router.get('/user/:id',function (req,res) {
     var user = {}
     connection.query('select * from users where id = ' + req.params.id,function (err,result) {
@@ -29,6 +32,7 @@ router.get('/user/:id',function (req,res) {
         res.end(JSON.stringify(user))
     })
 })
+// 测试get,多参数
 router.get('/addUser/:name/:age/:email',function (req,res) {
     var sql = 'insert into users(name,age,email) values(?,?,?)'
     var params = [req.params.name,req.params.age,req.params.email]
@@ -37,18 +41,21 @@ router.get('/addUser/:name/:age/:email',function (req,res) {
         res.end(JSON.stringify(result))
     })
 })
+// 测试get,删除元素
 router.get('/delUser/:id',function (req,res) {
     connection.query('delete  from users where id=' + req.params.id,function (err,result) {
         if (err) throw err
         res.end(JSON.stringify(result))
     })
 })
+// 测试get,更新元素
 router.get('/updateUser/:id',function (req,res) {
     connection.query('update users set name=? where id = ?',['LiMing',req.params.id],function (err,result) {
         if (err) throw err
         res.end(JSON.stringify(result))
     })
 })
+// 管理员端--注册
 router.post('/register',function (req,res) {
     const sql = 'insert into administrators(username, accountNo, password) values(?,?,?)'
     var str = ''
@@ -68,6 +75,7 @@ router.post('/register',function (req,res) {
         })
     })
 })
+// 管理员端--登录
 router.post('/login',function (req,res) {
     var str = ''
     var sql = 'select * from administrators where accountNo = ?'
@@ -93,9 +101,10 @@ router.post('/login',function (req,res) {
         })
     })
 })
+// 员工端--登录
 router.post('/staffLogin', (req, res) => {
     var str = ''
-    var sql = 'select staffPassword from staff where staffNo = ?'
+    var sql = 'select staffPassword from staff where staffNo = ? and staffStatus = 0'
     req.on('data', (chunk) => {
         str += chunk
     })
@@ -112,6 +121,7 @@ router.post('/staffLogin', (req, res) => {
         })
     })
 })
+// 管理员端--获取用户信息
 router.get('/userInfo', function (req,res) {
     var userInfo = ''
     connection.query('select * from administrators where accountNo = ' + req.query.accountNo, function (err, result) {
@@ -120,6 +130,7 @@ router.get('/userInfo', function (req,res) {
         if(userInfo) res.end(JSON.stringify(userInfo))
     })
 })
+// 管理员端--新增员工--获取新增员工账号
 router.get('/getMaxStaffNo',function (req,res) {
     var maxStaffNo = ''
     connection.query('select max(staffNo) as maxStaffNo from staff',function (err, result) {
@@ -129,6 +140,7 @@ router.get('/getMaxStaffNo',function (req,res) {
         else res.end('0')
     })
 })
+// 管理员端--新增订单--获取新增订单账号
 router.get('/getMaxOrderNo',function (req,res) {
     var maxOrderNo = ''
     connection.query('select max(orderNo) as maxOrderNo from orders',function (err,result) {
@@ -137,6 +149,7 @@ router.get('/getMaxOrderNo',function (req,res) {
         res.end(maxOrderNo)
     })
 })
+// 管理员端--新增员工
 router.post('/addStaff',function (req,res) {   
     var sql = 'insert into staff(staffNo, staffName, staffPassword, staffGender, staffID, staffPhone, staffResidence, createDate, inductionDate, creator) values(?,?,?,?,?,?,?,?,?,?)'
     var str = ''
@@ -153,6 +166,7 @@ router.post('/addStaff',function (req,res) {
         })
     })
 })
+// 管理员端--获取员工信息
 router.post('/queryStaff',function (req,res) { 
     var sql = 'select * from staff where staffStatus!=1 '  
     var str = ''
@@ -172,19 +186,51 @@ router.post('/queryStaff',function (req,res) {
         })
     })
 })
-router.post('/updateStaff',function (req,res) { 
+// 管理员端--获取历史员工信息
+router.post('/queryHistoryStaff',function (req,res) { 
+    var sql = 'select * from staff where staffStatus = 1 '  
     var str = ''
     req.on('data', (chunk) => {
         str += chunk
     })
     req.on('end', () => {
         str = JSON.parse(str)
-        connection.query(`update staff set staffName = '${str.staffName}', staffGender = '${str.staffGender}', staffID = '${str.staffID}', staffPhone = '${str.staffPhone}', staffResidence = '${str.staffResidence}', staffStatus = '${str.staffStatus}' where staffNo = '${str.staffNo}'`, function (err,result) {
+        if (str.staffNo != '') sql = sql + " and staffNo= '" + str.staffNo + "'"
+        if (str.staffName && str.staffName != '') sql = sql + " and staffName= '" + str.staffName + "'"
+        if (str.staffResidence && str.staffResidence != '') sql = sql + " and staffResidence= '" + str.staffResidence + "'"
+        if (str.staffGender && str.staffGender != '') sql = sql + " and staffGender= '" + str.staffGender + "'"
+        connection.query(sql, function (err,result) {
             if (err) throw err
+            res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+            res.end(JSON.stringify(result))
         })
     })
-    res.end(JSON.stringify('ok'))
 })
+// 管理员端--更新员工
+router.post('/updateStaff',function (req,res) { 
+    console.log(req);
+    var str = ''
+    req.on('data', (chunk) => {
+        str += chunk
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        if (str.resignDate === undefined) {
+            connection.query(`update staff set staffName = '${str.staffName}', staffGender = '${str.staffGender}', staffID = '${str.staffID}', staffPhone = '${str.staffPhone}', staffResidence = '${str.staffResidence}', staffStatus = '${str.staffStatus}' where staffNo = '${str.staffNo}'`, function (err,result) {
+                if (err) throw err
+                if (result.changedRows === 1) res.end(JSON.stringify('ok'))
+                else res.end(JSON.stringify('ng'))
+            })
+        } else {
+            connection.query(`update staff set staffName = '${str.staffName}', staffGender = '${str.staffGender}', staffID = '${str.staffID}', staffPhone = '${str.staffPhone}', staffResidence = '${str.staffResidence}', staffStatus = '${str.staffStatus}', resignDate = '${str.resignDate}' where staffNo = '${str.staffNo}'`, (err, result) => {
+                if (err) throw err
+                if (result.changedRows === 1) res.end(JSON.stringify('ok'))
+                else res.end(JSON.stringify('ng'))
+            })
+        }
+    })
+})
+// 管理员端--删除员工(已弃用)
 router.post('/delStaff',function (req,res) {
     var str = ''
     var params
@@ -201,9 +247,9 @@ router.post('/delStaff',function (req,res) {
         })
     })
 })
-//  导出员工表
+//  导出在职员工表
 router.get('/exportStaff',function (req,res) {
-    const sql = 'select * from staff'
+    const sql = 'select * from staff where staffStatus = 0'
     connection.query(sql, function (err,result) {
         if (err) throw err
         var datas=[]
@@ -223,22 +269,58 @@ router.get('/exportStaff',function (req,res) {
             datas.push(arrInner)    //  data中添加的要是数组，可以将对象的值分解添加进数组，例如：['1','name','上海']
         })
         var date = new Date().toLocaleDateString().replace(/\//g,'-')
-        var name = '员工表' + '_' + date + '.xlsx'
+        var time = new Date().toLocaleTimeString('chinese', {hour12: false}).replace(/:/g,'_')
+        // var name = '员工表' + '_' + date + '_' + time + '.xlsx'
+        var name = '在职员工表' + '_' + date + '.xlsx'
         writeExcel(name, datas)
         var filePath = path.resolve('../assets/excel/')
-        res.download(filePath + name, (err) => {
-            if(!err) { res.end('ok') }
-            else { res.end('ng') }
-        })
+        res.download(filePath + name)
+        res.end(JSON.stringify('ok'))
     })
 })
 function writeExcel(name, datas){
-    var buffer = xlsx.build([{ name: 'sheet1', data: datas}])
+    var buffer = xlsx.build([{ name: name, data: datas}])
     fs.writeFileSync('../assets/excel/' + name, buffer, {'flag':'w'})
 }
+//  导出在职员工表
+router.get('/exportHistoryStaff',function (req,res) {
+    const sql = 'select * from staff where staffStatus = 1'
+    connection.query(sql, function (err,result) {
+        if (err) throw err
+        var datas=[]
+        var title = ['员工号', '员工姓名', '性别', '身份证号', '联系方式', '居住地', '状态', '入职日期', '离职日期']//这是第一行 俗称列名
+        datas.push(title)
+        result.forEach((element) => {
+            var arrInner = []
+            arrInner.push(element.staffNo)
+            arrInner.push(element.staffName)
+            arrInner.push(element.staffGender)
+            arrInner.push(element.staffID)
+            arrInner.push(element.staffPhone)
+            arrInner.push(element.staffResidence)
+            arrInner.push(element.staffStatus === '0' ? '在职' : '离职')
+            arrInner.push(element.inductionDate)
+            arrInner.push(element.resignDate)
+            datas.push(arrInner)    //  data中添加的要是数组，可以将对象的值分解添加进数组，例如：['1','name','上海']
+        })
+        var date = new Date().toLocaleDateString().replace(/\//g,'-')
+        var time = new Date().toLocaleTimeString('chinese', {hour12: false}).replace(/:/g,'_')
+        // var name = '员工表' + '_' + date + '_' + time + '.xlsx'
+        var name = '历史员工表' + '_' + date + '.xlsx'
+        writeExcel(name, datas)
+        var filePath = path.resolve('../assets/excel/')
+        res.download(filePath + name)
+        res.end(JSON.stringify('ok'))
+    })
+})
+function writeExcel(name, datas){
+    var buffer = xlsx.build([{ name: name, data: datas}])
+    fs.writeFileSync('../assets/excel/' + name, buffer, {'flag':'w'})
+}
+// 管理员端--新增订单
 router.post('/addOrder',function (req, res) {   
     var sql = 'insert into orders(orderNo, orderClient, orderName, orderTotal, orderUnitPrice, orderStartDate, orderEndDate, creator, createDate) values(?,?,?,?,?,?,?,?,?)'
-    var str = ''
+    var str = ''    
     let params = []
     req.on('data', (chunk) => {
         str += chunk
@@ -252,6 +334,7 @@ router.post('/addOrder',function (req, res) {
         })
     })
 })
+// 管理员端--查询订单
 router.post('/queryOrder',function (req,res) { 
     var sql = 'select * from orders where orderStatus = 0'
     var str = ''
@@ -268,6 +351,7 @@ router.post('/queryOrder',function (req,res) {
         })
     })
 })
+// 管理员端--查询历史订单
 router.post('/queryHistoryOrder',function (req,res) { 
     var sql = 'select * from orders where orderStatus = 1'
     var str = ''
@@ -284,6 +368,7 @@ router.post('/queryHistoryOrder',function (req,res) {
         })
     })
 })
+// 管理员端--删除订单(已弃用)
 router.post('/delOrder',function (req,res) {
     var str = ''
     var params
@@ -300,6 +385,7 @@ router.post('/delOrder',function (req,res) {
         })
     })
 })
+// 管理员端--更新订单
 router.post('/updateOrder',function (req,res) { 
     const sql = `update orders set orderStatus = "1" where orderNo = ?`
     var str = ''
@@ -316,6 +402,7 @@ router.post('/updateOrder',function (req,res) {
     })
     res.end(JSON.stringify('ok'))
 })
+// 管理员端--获取订单选项
 router.get('/getOrderOption', (req, res) => {
     const sql = `select orderName, orderUnitPrice from orders where orderStatus = '0'`
     connection.query(sql, (err, result) => {
@@ -324,10 +411,11 @@ router.get('/getOrderOption', (req, res) => {
         else res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'}); res.end(JSON.stringify(result))
     })
 })
+// 管理员端--获取每日记账信息
 router.post('/getBillInfoForInsert',function (req,res) {
-    const sql = 'SELECT staff.staffNo, staff.staffName, D.staffDayWage, D.staffCompletedQuantity, D.orderName, D.orderUnitPrice, '
-    + 'D.remarks FROM staff LEFT JOIN (select * from dayWage where selectedDate = ? ) D ON staff.staffNo = D.staffNo; ' 
-    + 'select distinct orderName,orderUnitPrice from orders'
+    const sql = 'SELECT A.staffNo, A.staffName, D.staffDayWage, D.staffCompletedQuantity, D.orderName, D.orderUnitPrice, '
+    + 'D.remarks FROM (select staffNo, staffName from staff where staffStatus = 0) A LEFT JOIN (select * from dayWage where selectedDate = ? ) D ON A.staffNo = D.staffNo; ' 
+    + 'select distinct orderName, orderUnitPrice from orders where orderStatus = 0'
     var str = ''
     var params = ''
     req.on('data', (chunk) => {
@@ -342,9 +430,10 @@ router.post('/getBillInfoForInsert',function (req,res) {
         })
     })
 })
+// 管理员端--提交每日记账信息
 router.post('/dayWageInsert',function (req,res) {
-    const sql1 = 'select * from dayWage where mark = ?'
-    const sql2 = 'insert into dayWage(staffNo, staffName, orderName, orderUnitPrice, staffCompletedQuantity, staffDayWage, remarks, mark, selectedDate, selectedMonth) values (?,?,?,?,?,?,?,?,?,?)'
+    const sql1 = 'select * from daywage where mark = ?'
+    const sql2 = 'insert into daywage(staffNo, staffName, orderName, orderUnitPrice, staffCompletedQuantity, staffDayWage, remarks, mark, selectedDate, selectedMonth) values (?,?,?,?,?,?,?,?,?,?)'
     var str = ''
     var params = []
     req.on('data', (chunk) => {
@@ -352,24 +441,25 @@ router.post('/dayWageInsert',function (req,res) {
     })
     req.on('end', ()=> {
         str = JSON.parse(str)
-        connection.query(sql1, str.param[0].mark, (err, result) => {
-            if (err) throw err
-            if (result !== []) res.end(JSON.stringify('flag'))
-            else {
-                for(let i = 0; i < str.param.length; i++) {
-                    for(let j in str.param[i]) {
-                        params.push(str.param[i][j])
-                    }
-                    connection.query(sql2, params, function (err,result) {
+        for (let i = 0; i < str.param.length; i++ ) {
+            connection.query(sql1, str.param[i].mark, (err, result) => {
+                if (err) throw err
+                if (result[0]) res.end(JSON.stringify('flag'))
+                else {
+                    let obj = str.param[i]
+                    params.push(obj.staffNo, obj.staffName, obj.orderName, obj.orderUnitPrice, obj.staffCompletedQuantity, obj.staffDayWage, obj.remarks, obj.mark, obj.selectedDate, obj.selectedMonth)
+                    connection.query(sql2, params, function (err, result) {
+                        console.log(result);
                         if (err) throw err
                     })
                     params = []
                 }
-                res.end(JSON.stringify('ok'))
-            }
-        })
+            })
+        }
+        res.end('ok')
     })
 })
+// 管理员端--查询工资记录
 router.post('/qeuryDayWage',function (req,res) { 
     var sql = 'select * from dayWage where 1=1'
     var str = ''  
@@ -387,6 +477,7 @@ router.post('/qeuryDayWage',function (req,res) {
         })
     })
 })
+// 管理员端--更新工资记录
 router.post('/updateDayWage',function (req,res) { 
     const sql = 'update dayWage set orderName = ?, orderUnitPrice = ?, staffCompletedQuantity = ?, staffDayWage = ?, remarks = ? where mark = ?'
     var str = ''
@@ -399,69 +490,12 @@ router.post('/updateDayWage',function (req,res) {
         params = str.params
         connection.query(sql, params, function (err,result) {
             if (err) throw err
-            res.end(JSON.stringify(result))
+            if(result.changedRows === 1) res.end('ok')
+            else res.end('ng')
         })
     })
 })
-router.post('/queryDayWageMonthly',function (req,res) {
-    var sql = 'select * from dayWage where 1=1'
-    var str = ''  
-    req.on('data', (chunk) => {
-        str += chunk    
-    })
-    req.on('end', () => {
-        str = JSON.parse(str)
-        if (str.selectedMonth && str.selectedMonth != '') sql = sql + " and selectedMonth= '" + str.selectedMonth + "'"
-        if (str.staffNo && str.staffNo != '') sql = sql + " and staffNo= '" + str.staffNo + "'"
-        if (str.staffName && str.staffName != '') sql = sql + " and staffName= '" + str.staffName + "'"
-        connection.query(sql, function (err,result) {
-            if (err) throw err
-            res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
-            res.end(JSON.stringify(result))
-        })
-    })
-})
-// router.post('/salaryCalculate',function (req,res) { 
-//     var str = ''
-//     var params = []
-//     req.on('data', (chunk) => {
-//         str += chunk    
-//     })
-//     req.on('end', () => {
-//         str = JSON.parse(str)
-//         params = str.params
-//         console.log(params)
-//         for (let i = 0; i < params.length; i++) {
-//             console.log('"' + params[i] + '"')
-//             connection.query('update dayWage set settlement = "1" where mark = ' + '"' + params[i] + '"', function (err,result) {
-//                 if (err) throw err
-//             })  
-//         }
-//     })
-//     res.end(JSON.stringify('ok'))
-// })
-// router.post('/salaryCalculate',function (req,res) { 
-//     var str = ''
-//     var params = []
-//     req.on('data', (chunk) => {
-//         str += chunk    
-//     })
-//     req.on('end', () => {
-//         console.log(str)
-//         str = JSON.parse(str)
-//         console.log(str)
-//         params = str.params
-//         console.log(params)
-//         for(let i = 0; i<params.length; i++){
-//             connection.query(`update dayWage set settlement = "1" where mark = '${params[i]}'`, function (err,result) {
-//                 console.log(result)
-//                 if (err) throw err
-//             })
-//         }
-        
-//     })
-//     res.end(JSON.stringify('ok'))
-// })
+// 管理员端--查询工资结算信息
 router.post('/salaryCalculate',function (req,res) {
     var str = ''
     var params = []
@@ -479,6 +513,79 @@ router.post('/salaryCalculate',function (req,res) {
     })
     res.end(JSON.stringify('ok'))
 })
+// 管理员端--按月查询工资详细
+router.post('/queryDayWageMonthly', (req, res) => {
+    var str = ''
+    var sql = 'SELECT * FROM daywage WHERE selectedMonth = ?'
+    req.on('data', (chunk) => {
+        str += chunk
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        if (str.staffNo && str.staffNo !== '') sql = sql + "AND staffNo = '" + str.staffNo + "'"
+        if (str.staffName && str.staffName !== '') sql = sql + "AND staffName = '" + str.staffName + "'"
+        connection.query(sql, str.selectedMonth, (err, result) => {
+            if (err) throw err
+            if (result.length === 0) res.end()
+            else {
+                res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+                res.end(JSON.stringify(result))
+            }
+        })
+    })
+})
+// 管理员端--查询工资结算信息
+router.post('/queryTotalDayWageMonthly', (req, res) => {
+    var str = ''
+    const sql1 = 'SELECT staffNo, staffName, SUM(staffDayWage) AS monthWage, selectedMonth, settlement, remarks FROM daywage WHERE selectedMonth = ? GROUP BY staffNo'
+    const sql2 = 'SELECT staffNo, staffName, SUM(staffDayWage), selectedMonth, settlement, remarks FROM daywage WHERE selectedMonth = ? and staffNo = ? GROUP BY staffNo'
+    const sql3 = 'SELECT staffNo, staffName, SUM(staffDayWage), selectedMonth, settlement, remarks FROM daywage WHERE selectedMonth = ? and staffName = ? GROUP BY staffNo'
+    const sql4 = 'SELECT staffNo, staffName, SUM(staffDayWage), selectedMonth, settlement, remarks FROM daywage WHERE selectedMonth = ? and staffNo = ? and staffName = ? GROUP BY staffNo'
+    req.on('data', (chunk) => {
+        str += chunk
+    })
+    req.on('end', () => {
+        str = JSON.parse(str)
+        if (str.staffNo === '' && str.staffName === '') {
+            connection.query(sql1, str.selectedMonth, (err, result) => {
+                if (err) throw err
+                if (result.length === 0 ) res.end('none')
+                else {
+                    res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+                    res.end(JSON.stringify(result))
+                }
+            })
+        } else if (str.staffNo !== '' && str.staffName === '') {
+            connection.query(sql2, [str.selectedMonth, str.staffNo], (err, result) => {
+                if (err) throw err
+                if (result.length === 0 ) res.end('none')
+                else {
+                    res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+                    res.end(JSON.stringify(result))
+                }
+            })
+        } else if (str.staffNo === '' && str.staffName !== '') {
+            connection.query(sql3, [str.selectedMonth, str.staffName], (err, result) => {
+                if (err) throw err
+                if (result.length === 0 ) res.end('none')
+                else {
+                    res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+                    res.end(JSON.stringify(result))
+                }
+            })
+        } else {
+            connection.query(sql4, [str.selectedMonth, str.staffNo, str.staffName], (err, result) => {
+                if (err) throw err
+                if (result.length === 0 ) res.end('none')
+                else {
+                    res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'})
+                    res.end(JSON.stringify(result))
+                }
+            })
+        }
+    })
+})
+// 员工端--打卡
 router.post('/clockIn', (req, res) => {
     var str = ''
     const sql1 = 'select * from attendance where mark = ?'
@@ -519,6 +626,7 @@ router.post('/clockIn', (req, res) => {
         })
     })
 })
+// 员工端--本月打卡记录
 router.get('/queryClockRecord/:year/:month/:staffNo', (req, res) => {
     const sql = `select * from attendance where year(creactedDate) = '${req.params.year}' and month(creactedDate) = '${req.params.month}' and staffNo = '${req.params.staffNo}' order by creactedDate`
     connection.query(sql, (err, result) => {
@@ -531,6 +639,7 @@ router.get('/queryClockRecord/:year/:month/:staffNo', (req, res) => {
         }
     })
 })
+// 员工端--更改密码
 router.post('/changePassword', (req, res) => {
     var str = ''
     const sql1 = 'select * from staff where staffNo = ?'

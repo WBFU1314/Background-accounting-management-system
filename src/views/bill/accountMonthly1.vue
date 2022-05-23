@@ -2,7 +2,7 @@
   <div class="content-box" >
     <div class="container">
       <div class="botton-group">
-        <el-button type="primary" @click="settlement()" :disabled="this.selectionData.length < 1">结 算</el-button>
+        <el-button type="primary" @click="correct()" :disabled="this.selectionData.length != 1">更 正</el-button>
         <el-button type="primary" @click="getData()">查 询</el-button>
       </div>
       <el-divider />
@@ -13,7 +13,7 @@
               <el-date-picker
                 v-model="searchData.selectedMonth"
                 type="month"
-                placeholder="选择月份" />
+                placeholder="选择月份" @change="getData()" />
             </el-form-item>
           </el-col>
           <el-col :span="6">
@@ -32,57 +32,74 @@
         stripe
         ref="selectionData"
         :data="tableData"
-        :summary-method="getSummaries"
-        show-summary
-        resizable
-        :height="theight"
         tooltip-effect="dark"
         style="width: 100%"
         highlight-current-row
+        height="420"
         @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="60" align="center" />
-        <el-table-column type="index" label="序号" width="55" align="center" />
-        <el-table-column prop="staffNo" label="员工编号" align="center">
+        <el-table-column type="selection" width="55" align="center" />
+        <el-table-column type="index" label="序号" width="55px" align="center" />
+        <el-table-column prop="staffNo" label="员工编号" width="90" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffNo}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="staffName" label="员工姓名" align="center">
+        <el-table-column prop="staffName" label="员工姓名" width="130" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.staffName}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="monthWage" label="工资" align="center">
+        <el-table-column prop="date" label="日期" width="90" align="center">
           <template slot-scope="scope">
-            <span>{{scope.row.monthWage}}</span>
+            <span>{{scope.row.selectedDate}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="selectedMonth" label="月份" align="center">
+        <el-table-column label="订单名称" width="150" align="center">
           <template slot-scope="scope">
-            <span>{{scope.row.selectedMonth}}</span>
-          </template>
-          </el-table-column>
-        <el-table-column prop="calculation" label="结算" align="center">
-          <template slot-scope="scope">
-            <span v-if="scope.row.settlement == 0" style="color: red">未结算</span>
-            <span v-else style="color: green">已结算</span>
+            <span>{{scope.row.orderName}}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="remarks" label="备注" align="center">
+        <el-table-column prop="orderPrice" label="订单单价" width="80" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.orderUnitPrice}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="完成数量" width="160" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.staffCompletedQuantity}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="staffDayWage" label="单日工资" width="80" align="center">
+          <template slot-scope="scope">
+            <span>{{scope.row.staffDayWage}}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="remarks" label="备注" width="" align="center">
           <template slot-scope="scope">
             <span>{{scope.row.remarks}}</span>
           </template>
         </el-table-column>
       </el-table>
+      <el-pagination
+        style="text-align: center; margin-top: 8px"
+        @current-change="handleCurrentChange"
+        layout="total, prev, pager, next"
+        :current-page="page.currentPage"
+        :page-size="page.pageSize"
+        :total="page.total">
+      </el-pagination>
+      <correct v-if="showFlag" :showFlag='showFlag' :selectedData='selectedData' :options='options'
+        distinguish='2' @setDialogClose='showFlag = false'/>
     </div>
   </div>
 </template>
 <script>
+import correct from '@/components/correct.vue'
 export default {
+  components: { correct },
   data () {
     return {
-      orderName: '',
-      staffCompletedQuantity: '',
+      showFlag: false,
       searchData: {
         selectedMonth: new Date(),
         staffNo: '',
@@ -91,29 +108,19 @@ export default {
       rawData: [],
       tableData: [],
       selectionData: [],
-      theight: '440'
+      options: [],
+      page: {
+        currentPage: 1,
+        pageSize: 10,
+        total: 30
+      }
     }
   },
+  mounted () {
+    this.getData()
+    this.getDict()
+  },
   methods: {
-    settlement () {
-      let params = []
-      for (let i = 0; i < this.selectionData.length; i++) {
-        params.push(this.selectionData[i].mark)
-      }
-      this.$axios.post('api/salaryCalculate', {
-        params
-      })
-      this.getData()
-    },
-    //   【导出excel】
-    download () {
-      for (let i = 0; i < this.tableData.length; i++) {
-        console.log(this.tableData[i].vehicleNo)
-      }
-    },
-    setCurrent (row) {
-      this.$refs.selectionData.setCurrentRow(row)
-    },
     // 勾选表格颜色修改
     tableRowClassName ({row, rowIndex}) {
       if (!this.selectionData) return ''
@@ -123,75 +130,40 @@ export default {
         return ''
       }
     },
-    orderNameSelected (val) {
-      if (val.orderName === 1) {
-        val.orderPrice = 1
-      } else if (val.orderName === 2) {
-        val.orderPrice = 2
-      } else if (val.orderName === 3) {
-        val.orderPrice = 3
-      } else if (val.orderName === 4) {
-        val.orderPrice = 4
-      } else if (val.orderName === 5) {
-        val.orderPrice = 5
-      }
+    handleSelectionChange (val) {
+      this.selectionData = val
     },
-    CompletedQuantityinputed (val) {
-      if (val.staffCompletedQuantity != null) {
-        val.staffDayWage = val.orderPrice * val.staffCompletedQuantity
-      }
-      //  发送完成数量，行内的订单单价，得出单日工资。
-    },
-    getSummaries (param) {
-      const { columns, data } = param
-      const sums = []
-      columns.forEach((column, index) => {
-        if (index === 0) {
-          sums[index] = '合计'
-          return
-        }
-        if (index === 4) {
-          const values = data.map(item => Number(item[column.property]))
-          sums[index] = values.reduce((prev, curr) => {
-            const value = Number(curr)
-            if (!isNaN(value)) {
-              return prev + curr
-            } else {
-              return prev
-            }
-          }, 0)
-          sums[index] += ' 元'
-        } else {
-          sums[index] = '--'
-        }
-      })
-      setTimeout(() => {
-        console.log(111)
-        this.theight = '441'
-      }, 50)
-      return sums
+    correct () {
+      this.showFlag = true
+      this.selectedData = this.selectionData[0]
+      this.staffNo = this.selectionData[0].staffNo
+      this.staffName = this.selectionData[0].staffName
     },
     getData () {
       let a = this.searchData.selectedMonth.getFullYear()
       let b = this.searchData.selectedMonth.getMonth() + 1
       let selectedMonth = a + '/' + b
-      this.$axios.post('api/queryTotalDayWageMonthly', {
+      this.$axios.post('api/accountMonthly', {
         selectedMonth: selectedMonth,
         staffNo: this.searchData.staffNo,
         staffName: this.searchData.staffName
       }).catch(error => {
         console.log('error:' + error)
-      }).then(response => {
-        this.rawData = response.data
-        this.tableData = this.rawData
+      }).then(res => {
+        this.rawData = res.data
+        this.page.total = this.rawData.length
+        this.tableData = this.rawData.slice(0, 10)
       })
     },
-    handleSelectionChange (val) {
-      this.selectionData = val
+    getDict () {
+      this.$axios.get('api/getOrderOption').then((res) => {
+        this.options = res.data
+        console.log('信息页', this.options)
+      })
+    },
+    handleCurrentChange (currentPage) {
+      this.tableData = this.rawData.slice((currentPage - 1) * 10, currentPage * 10)
     }
-  },
-  mounted () {
-    this.getData()
   }
 }
 </script>

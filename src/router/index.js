@@ -108,6 +108,13 @@ const router = new Router({
               meta: {
                 title: '新增员工'
               }
+            },
+            {
+              path: '/staff/staffHistoryInfo',
+              component: () => import('@/views/staff/staffHistoryInfo.vue'),
+              meta: {
+                title: '历史员工'
+              }
             }
           ]
         },

@@ -31,6 +31,10 @@ export default {
         {
           index: 'staffAdd',
           title: '新增员工'
+        },
+        {
+          index: 'staffHistoryInfo',
+          title: '历史员工'
         }
       ]
     }

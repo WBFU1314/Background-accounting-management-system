@@ -10,7 +10,7 @@
     <!-- 页面头部部分 -->
     <div class="header">
       <div>
-        <div class="logo">记账管理系统</div>
+        <div class="logo" @click="goHome()">记账管理系统</div>
         <!-- 水平一级菜单 -->
         <div style="float: left">
           <el-menu
@@ -30,9 +30,13 @@
       </div>
       <div class="header-right">
         <div class="header-user-con">
+          <div class="themeColor" @click="changeThemeColor">
+            <i class="el-icon-sunny" v-if="flag" style="color: #ffffff"></i>
+            <i class="el-icon-moon" v-else></i>
+          </div>
           <!-- 用户头像 -->
           <div class="user-avator">
-            <img src="../assets/image/headPortrait.jpg" />
+            <img src="../assets/image/headPortrait.jpg" width="100" height="100" />
           </div>
           <!-- 用户名下拉菜单 -->
           <el-dropdown
@@ -71,7 +75,8 @@ export default {
         { index: 'bill', title: '每日记账' },
         { index: 'salary', title: '工资结算' },
         { index: 'permission', title: '权限管理' }
-      ]
+      ],
+      flag: false
     }
   },
   mounted () {
@@ -92,12 +97,28 @@ export default {
     handleSelect (index) {
       this.$router.push('/' + index)
     },
+    changeThemeColor () {
+      this.flag = !this.flag
+      var r = document.querySelector(':root')
+      if (!this.flag) {
+        r.style.setProperty('--bgColor', '#ffffff')
+        r.style.setProperty('--fontColor', '#000000')
+        r.style.setProperty('--selectColor', '#ffffff')
+      } else {
+        r.style.setProperty('--bgColor', '#130f40')
+        r.style.setProperty('--fontColor', '#ffffff')
+        r.style.setProperty('--selectColor', '#000000')
+      }
+    },
     // 用户名下拉菜单选择事件
     handleCommand (command) {
       if (command === 'loginout') {
         localStorage.clear()
         this.$router.push({path: '/'})
       }
+    },
+    goHome () {
+      this.$router.push('/home')
     }
   }
 }
@@ -114,7 +135,7 @@ export default {
   width: 100%;
   height: 70px;
   font-size: 22px;
-  background: #ffffff;
+  background: var(--bgColor);
 }
 .header .logo {
   float: left;
@@ -123,10 +144,15 @@ export default {
   height: 29px;
   width: 160px;
   vertical-align: middle;
+  color: var(--fontColor);
 }
 .header-user-con {
   display: flex;
   height: 70px;
+  align-items: center;
+}
+.themeColor{
+  display: flex;
   align-items: center;
 }
 .user-avator {
@@ -141,18 +167,21 @@ export default {
 .user-name {
   margin-left: 10px;
 }
+.el-menu{
+  background-color: var(--bgColor);
+}
 .el-menu.el-menu--horizontal {
   border-bottom: none !important;
 }
 .el-menu--horizontal > .el-menu-item.is-active {
-  border-bottom: 2px solid #038387;
-  color: #038387;
+  border-bottom: 2px solid var(--theme);
+  color: var(--theme);
   font-weight: 700;
 }
 .el-menu--horizontal > .el-menu-item {
   font-family: PingFang;
   font-size: 16px;
-  color: black;
+  color: var(--fontColor);
 }
 .el-main {
   padding: 0;

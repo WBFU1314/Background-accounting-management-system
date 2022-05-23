@@ -7,13 +7,10 @@
           <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能结算一条数据！" placement="top-start">
             <el-button type="primary" @click="settle()" :disabled ="this.selectionData.length != 1">结算订单</el-button>
           </el-tooltip>
-          <el-tooltip class="item" effect="dark" content="不可恢复操作！请确认后再点击！一次只能删除一条订单！" placement="top-start">
-            <el-button type="primary" @click="deletes()" :disabled ="this.selectionData.length != 1">删除订单</el-button>
-          </el-tooltip>
           <el-button type="primary" @click="download()">导出订单信息表</el-button>
         </div>
         <div style="margin-left: 400px">
-          <el-button type="primary" @click="getData()">查 询</el-button>
+          <el-button type="primary" @click="fetchData()">查 询</el-button>
         </div>
       </div>
       <el-divider></el-divider>
@@ -21,17 +18,18 @@
         <el-row>
           <el-col :span="6">
             <el-form-item label="订单编号">
-              <el-input v-model="searchDate.orderNo" clearable placeholder="请输入订单编号" style="width :150px"/>
+              <el-input v-model="searchDate.orderNo" clearable placeholder="请输入订单编号" style="width :150px" @keyup.enter.native="fetchData()" />
             </el-form-item>
           </el-col>
           <el-col :span="6">
             <el-form-item label="订单名称" clearable>
-              <el-input v-model="searchDate.orderName" clearable placeholder="请输入订单名称" style="width :150px"/>
+              <el-input v-model="searchDate.orderName" clearable placeholder="请输入订单名称" style="width :150px" @keyup.enter.native="fetchData()" />
             </el-form-item>
           </el-col>
         </el-row>
       </el-form>
       <el-table
+        v-loading="loading"
         stripe
         ref="selectionData"
         :data="tableData"
@@ -99,6 +97,7 @@
 export default {
   data () {
     return {
+      loading: false,
       searchDate: {
         orderNo: '',
         orderName: ''
@@ -117,17 +116,6 @@ export default {
     routerto () {
       this.$router.push('/order/orderAdd')
     },
-    //  删除订单
-    deletes () {
-      let params = []
-      for (let i = 0; i < this.selectionData.length; i++) {
-        params.push(this.selectionData[i].orderNo)
-      }
-      this.$axios.post('api/delOrder', {
-        params
-      })
-      this.getData()
-    },
     //  结算订单
     settle () {
       let params = []
@@ -135,7 +123,7 @@ export default {
         params.push(this.selectionData[i].orderNo)
       }
       this.$axios.post('api/updateOrder', {params})
-      this.getData()
+      this.fetchData()
     },
     //   【导出excel】
     download () {
@@ -156,7 +144,8 @@ export default {
     handleSelectionChange (val) {
       this.selectionData = val
     },
-    getData () {
+    fetchData () {
+      this.loading = true
       this.$axios.post('api/queryOrder', {
         orderNo: this.searchDate.orderNo,
         orderName: this.searchDate.orderName
@@ -166,6 +155,7 @@ export default {
         this.rawData = response.data
         this.page.total = this.rawData.length
         this.tableData = this.rawData.slice(0, 10)
+        this.loading = false
       })
     },
     handleCurrentChange (currentPage) {
@@ -173,7 +163,7 @@ export default {
     }
   },
   mounted () {
-    this.getData()
+    this.fetchData()
   }
 }
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    {{ date }}
+    {{ flag }}
   </div>
 </template>
 <script>
@@ -8,8 +8,22 @@
 export default{
   data () {
     return {
-      date: new Date().toLocaleDateString().replace(/\//g, '-')
+      date: new Date().toLocaleDateString().replace(/\//g, '-'),
+      shilaohua: true,
+      value1: null,
+      value2: 1,
+      value3: null,
+      flag: false
     }
+  },
+  mounted () {
+    if (this.shilaohua && (this.value1 === 1 || this.value2 === 1)) {
+      this.flag = true
+    }
+    if (!this.shilaohua && this.value2 === 2) {
+      this.flag = true
+    }
+    console.log(this.flag)
   }
 }
 </script>

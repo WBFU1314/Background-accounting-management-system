@@ -5,6 +5,8 @@ var mysql = {
   user: 'root',
   password: '1234qwer',
   database: 'test',
+  // dateStrings : true, //解决时间格式
+  timezone: '08:00',
   multipleStatements: true
 }
 module.exports = {mysql}

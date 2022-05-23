@@ -6,7 +6,6 @@
         <el-tooltip class="item" effect="dark" content="请勾选数据进行提交！不可重复提交！可勾选数据进行更改！" placement="top-start">
           <el-button type="primary" @click="submit()">保 存</el-button>
         </el-tooltip>
-        <el-button type="primary" @click="correct()" :disabled="this.selectionData.length != 1">更 正</el-button>
         </div>
         <div style="margin-left: 718px">
           <el-button type="primary" @click="search()">查 询</el-button>
@@ -47,7 +46,7 @@
         tooltip-effect="dark"
         style="width: 100%"
         highlight-current-row
-        height="400"
+        height="420"
         @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" align="center" />
         <el-table-column type="index" label="序号" width="55" align="center" />
@@ -108,13 +107,10 @@
         :page-size="page.pageSize"
         :total="page.total">
       </el-pagination>
-      <correct v-if="showFlag" :showFlag='showFlag' :selectedData='selectedData' :options='options'
-        distinguish='1' @setDialogClose='showFlag = false'/>
     </div>
   </div>
 </template>
 <script>
-import correct from '@/components/correct.vue'
 export default {
   data () {
     return {
@@ -171,7 +167,9 @@ export default {
       } else {
         this.$axios.post('api/dayWageInsert', {param})
       }
-      this.getData()
+      setTimeout(() => {
+        this.getData()
+      }, 1000)
     },
     download () {
       for (let i = 0; i < this.tableData.length; i++) {
@@ -191,6 +189,7 @@ export default {
     },
     handleSelectionChange (val) {
       this.selectionData = val
+      console.log(this.selectionData)
     },
     orderNameSelected (val) {
       for (let i = 0; i < this.options.length; i++) {
@@ -209,12 +208,6 @@ export default {
         val.staffDayWage = staffDayWage.toFixed(2)
       }
       //  发送完成数量，行内的订单单价，得出单日工资。
-    },
-    correct () {
-      this.showFlag = true
-      this.selectedData = this.selectionData[0]
-      this.staffNo = this.selectionData[0].staffNo
-      this.staffName = this.selectionData[0].staffName
     },
     // 比较时间
     compareDate () {
@@ -258,11 +251,11 @@ export default {
       } else {
         this.display = false
       }
-      console.log(this.display)
       if (this.display) this.getData()
       else this.search()
     },
     getData () {
+      this.selectedData = []
       let selectedDate = new Date().toLocaleDateString()
       this.$axios.post('api/getBillInfoForInsert', {
         selectedDate
@@ -298,9 +291,6 @@ export default {
   },
   mounted () {
     this.getData()
-  },
-  components: {
-    correct
   }
 }
 </script>

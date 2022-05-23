@@ -5,7 +5,7 @@
   width="35%"
   center
   :before-close="handleClose">
-  <el-form :model="form" label-width="100px" :disabled="type==='staffDetail'">
+  <el-form :model="form" label-width="100px" :disabled="type==='staffDetail'" v-loading="loading">
     <el-form-item label="员工编号">
       <el-input v-model="form.staffNo" disabled></el-input>
     </el-form-item>
@@ -38,14 +38,14 @@
     <el-form-item label="入职时间" v-if="this.type ==='staffDetail'">
       <el-input v-model="form.createDate"></el-input>
     </el-form-item>
-    <el-form-item label="离职时间" v-if="form.resignDate">
+    <!-- <el-form-item label="离职时间" v-if="form.resignDate">
       <el-input v-model="form.resignDate"></el-input>
-    </el-form-item>
+    </el-form-item> -->
   </el-form>
   <span slot="footer" class="dialog-footer">
-    <el-button type="primary" v-if="this.type === 'staffDetail'" @click="handleClose">确 定</el-button>
+    <el-button type="primary" v-if="this.type === 'staffDetail'"     @click="handleClose">确 定</el-button>
     <el-button type="primary" v-if="this.type === 'editStaffDetail'" @click="handleClose">取 消</el-button>
-    <el-button type="primary" v-if="this.type === 'editStaffDetail'" @click="submit">提交</el-button>
+    <el-button type="primary" v-if="this.type === 'editStaffDetail'" @click="submit">提 交</el-button>
   </span>
   </el-dialog>
 </template>
@@ -67,10 +67,12 @@ export default {
   },
   data () {
     return {
+      loading: false,
       title: '',
       form: {},
       option1: [{label: '女'}, {label: '男'}],
-      option2: [{label: '在职', value: '0'}, {label: '离职', value: '1'}]
+      option2: [{label: '在职', value: '0'}, {label: '离职', value: '1'}],
+      flag: false
     }
   },
   mounted () {
@@ -79,12 +81,17 @@ export default {
   },
   methods: {
     fetchData (staffNo) {
+      this.loading = true
       this.$axios.post('api/queryStaff', {staffNo: staffNo}).then((res) => {
         this.form = res.data[0]
         this.form.staffStatusText = this.getStatus(this.form.staffStatus)
+        this.loading = false
       })
     },
     submit () {
+      if (this.form.staffStatus === '1') {
+        this.form.resignDate = new Date().toLocaleDateString()
+      }
       this.$axios.post('api/updateStaff', this.form).then((res) => {
         if (res.data === 'ok') {
           this.$message.success('提交成功！')

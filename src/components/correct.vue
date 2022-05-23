@@ -82,7 +82,15 @@ export default{
       let param = this.selectedData
       let params = [param.orderName, param.orderUnitPrice, param.staffCompletedQuantity, param.staffDayWage, param.remarks, param.mark]
       this.$axios.post('api/updateDayWage', {params})
+        .then((res) => {
+          if (res.data === 'ok') this.$message.success('更正成功!')
+          else this.$message.error('出错!')
+        })
+        .catch((err) => {
+          console.log(err)
+        })
       this.$emit('setDialogClose')
+      this.$emit('fetchData')
     },
     // 修正订单名称，从而修正订单单价
     orderNameSelected () {
@@ -108,9 +116,7 @@ export default{
       //  发送完成数量，行内的订单单价，得出单日工资。
     }
   },
-  mounted () {
-    console.log('修改页 ', this.options)
-  }
+  mounted () {}
 }
 </script>
 <style scoped>

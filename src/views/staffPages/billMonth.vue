@@ -59,7 +59,12 @@ export default {
         selectedMonth: this.monthValue
       }
       this.$axios.post('api/queryDayWageMonthly', params).then((res) => {
-        this.list = res.data
+        this.list = []
+        if (res.data.length > 0) {
+          this.list = res.data
+        } else {
+          this.$message.warning('当月无记录！')
+        }
       })
     },
     fetchDict () {
@@ -69,6 +74,7 @@ export default {
       this.month = value[0] + '年' + value[1] + '月'
       this.monthValue = value[0] + '/' + value[1]
       this.showPicker = false
+      this.fetchData()
     }
   }
 }
